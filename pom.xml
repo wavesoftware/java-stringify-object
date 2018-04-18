@@ -35,6 +35,11 @@
     <url>http://github.com/wavesoftware/java-stringify-object</url>
   </scm>
 
+  <ciManagement>
+    <system>Travis CI</system>
+    <url>https://travis-ci.org/wavesoftware/java-stringify-object</url>
+  </ciManagement>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <maven.compiler.source>1.8</maven.compiler.source>
