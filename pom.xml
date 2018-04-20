@@ -13,6 +13,11 @@
   <description>A utility to safely inspect any Java Object as string representation</description>
   <url>https://github.com/wavesoftware/java-stringify-object</url>
 
+  <organization>
+    <name>Wave Software</name>
+    <url>http://wavesoftware.pl</url>
+  </organization>
+
   <licenses>
     <license>
       <name>The Apache Software License, Version 2.0</name>
@@ -35,15 +40,34 @@
     <url>http://github.com/wavesoftware/java-stringify-object</url>
   </scm>
 
+  <issueManagement>
+    <system>GitHub Issues</system>
+    <url>https://github.com/wavesoftware/java-stringify-object/issues</url>
+  </issueManagement>
+
   <ciManagement>
     <system>Travis CI</system>
     <url>https://travis-ci.org/wavesoftware/java-stringify-object</url>
   </ciManagement>
 
   <properties>
+    <netbeans.hint.license>apache20</netbeans.hint.license>
+    <maven.required.version>3.0.4</maven.required.version>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <maven.compiler.source>1.7</maven.compiler.source>
-    <maven.compiler.target>1.7</maven.compiler.target>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <sonar.working.directory>${project.build.directory}/sonar</sonar.working.directory>
+    <sonar.host.url>https://sonar.wavesoftware.pl</sonar.host.url>
+    <sonar.java.coveragePlugin>jacoco</sonar.java.coveragePlugin>
+    <java.source.version>7</java.source.version>
+    <sonar.java.source>${java.source.version}</sonar.java.source>
+    <maven.compiler.source>1.${java.source.version}</maven.compiler.source>
+    <maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
+    <jacoco.version>0.8.1</jacoco.version>
+
+    <skipTests />
+    <coveralls.skip>${skipTests}</coveralls.skip>
+    <sonar.skip>${skipTests}</sonar.skip>
+    <failsafe.rerunFailingTestsCount>2</failsafe.rerunFailingTestsCount>
   </properties>
 
   <dependencies>
@@ -97,22 +121,90 @@
       <version>2.5.0</version>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>pl.wavesoftware</groupId>
+      <artifactId>jmh-junit-utilities</artifactId>
+      <version>1.0.0</version>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 
   <build>
     <pluginManagement>
       <plugins>
         <plugin>
-          <artifactId>maven-compiler-plugin</artifactId>
-          <version>3.6.2</version>
+          <groupId>org.sonarsource.scanner.maven</groupId>
+          <artifactId>sonar-maven-plugin</artifactId>
+          <version>3.4.0.905</version>
         </plugin>
+        <plugin>
+          <groupId>external.atlassian.jgitflow</groupId>
+          <artifactId>jgitflow-maven-plugin</artifactId>
+          <version>1.0-m5.1</version>
+          <configuration>
+            <enableSshAgent>true</enableSshAgent>
+            <flowInitContext>
+              <versionTagPrefix>v</versionTagPrefix>
+            </flowInitContext>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.jacoco</groupId>
+          <artifactId>jacoco-maven-plugin</artifactId>
+          <version>${jacoco.version}</version>
+          <executions>
+            <execution>
+              <id>jacoco-initialize</id>
+              <goals>
+                <goal>prepare-agent</goal>
+                <goal>prepare-agent-integration</goal>
+              </goals>
+            </execution>
+            <execution>
+              <id>jacoco-site</id>
+              <phase>post-integration-test</phase>
+              <goals>
+                <goal>report</goal>
+                <goal>report-integration</goal>
+              </goals>
+            </execution>
+          </executions>
+          <configuration>
+            <includes>
+              <include>pl/wavesoftware/**</include>
+            </includes>
+          </configuration>
+        </plugin>
+        <plugin>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.7.0</version>
+          <configuration>
+            <showWarnings>true</showWarnings>
+            <compilerArgs>
+              <arg>-Xlint:all</arg>
+            </compilerArgs>
+          </configuration>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-jar-plugin</artifactId>
+          <version>3.1.0</version>
+        </plugin>
+
         <plugin>
           <artifactId>maven-surefire-plugin</artifactId>
           <version>2.21.0</version>
+          <configuration>
+            <trimStackTrace>false</trimStackTrace>
+          </configuration>
         </plugin>
+
         <plugin>
           <artifactId>maven-failsafe-plugin</artifactId>
           <version>2.21.0</version>
+          <configuration>
+            <trimStackTrace>false</trimStackTrace>
+          </configuration>
           <executions>
             <execution>
               <goals>
@@ -122,6 +214,65 @@
             </execution>
           </executions>
         </plugin>
+
+        <plugin>
+          <artifactId>maven-deploy-plugin</artifactId>
+          <version>2.8.2</version>
+        </plugin>
+
+        <plugin>
+          <artifactId>maven-source-plugin</artifactId>
+          <version>3.0.1</version>
+          <executions>
+            <execution>
+              <id>attach-sources</id>
+              <goals>
+                <goal>jar-no-fork</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <artifactId>maven-javadoc-plugin</artifactId>
+          <version>3.0.0</version>
+          <executions>
+            <execution>
+              <id>attach-javadocs</id>
+              <goals>
+                <goal>jar</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <artifactId>maven-gpg-plugin</artifactId>
+          <version>1.6</version>
+          <executions>
+            <execution>
+              <id>sign-artifacts</id>
+              <phase>verify</phase>
+              <goals>
+                <goal>sign</goal>
+              </goals>
+            </execution>
+          </executions>
+        </plugin>
+        <plugin>
+          <artifactId>maven-clean-plugin</artifactId>
+          <version>3.1.0</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-install-plugin</artifactId>
+          <version>2.5.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-resources-plugin</artifactId>
+          <version>3.0.2</version>
+        </plugin>
+        <plugin>
+          <artifactId>maven-site-plugin</artifactId>
+          <version>3.7</version>
+        </plugin>
       </plugins>
     </pluginManagement>
     <plugins>
@@ -130,5 +281,144 @@
       </plugin>
     </plugins>
   </build>
+
+  <profiles>
+    <profile>
+      <id>jacoco</id>
+      <activation>
+        <property>
+          <name>env.JACOCO</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>sonar</id>
+      <activation>
+        <property>
+          <!-- tries to determine is interactive user session -->
+          <name>env.GDMSESSION</name>
+        </property>
+      </activation>
+      <properties>
+        <sonar.analysis.mode>preview</sonar.analysis.mode>
+        <sonar.issuesReport.console.enable>true</sonar.issuesReport.console.enable>
+        <sonar.issuesReport.html.enable>true</sonar.issuesReport.html.enable>
+        <sonar.report.export.path>issues.json</sonar.report.export.path>
+      </properties>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+          </plugin>
+
+          <plugin>
+            <groupId>org.sonarsource.scanner.maven</groupId>
+            <artifactId>sonar-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>default</id>
+                <phase>post-integration-test</phase>
+                <goals>
+                  <goal>sonar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <plugin>
+            <groupId>org.codehaus.gmaven</groupId>
+            <artifactId>groovy-maven-plugin</artifactId>
+            <version>2.0</version>
+            <dependencies>
+              <dependency>
+                <groupId>org.codehaus.groovy</groupId>
+                <artifactId>groovy-all</artifactId>
+                <version>2.4.6</version>
+              </dependency>
+            </dependencies>
+            <configuration>
+              <defaults>
+                <sonar.issues.file>${sonar.working.directory}/${sonar.report.export.path}
+                </sonar.issues.file>
+                <sonar.skip>${sonar.skip}</sonar.skip>
+              </defaults>
+              <source>https://raw.githubusercontent.com/wavesoftware/java-eid-exceptions/develop/src/test/groovy/verify-sonar-issues.groovy</source>
+            </configuration>
+            <executions>
+              <execution>
+                <id>verify-sonar-issues</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>execute</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>coveralls</id>
+      <activation>
+        <property>
+          <name>env.COVERALLS</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.eluder.coveralls</groupId>
+            <artifactId>coveralls-maven-plugin</artifactId>
+            <version>4.3.0</version>
+            <executions>
+              <execution>
+                <id>coveralls-default</id>
+                <phase>verify</phase>
+                <goals>
+                  <goal>report</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>release-profile</id>
+      <activation>
+        <property>
+          <name>performRelease</name>
+          <value>true</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <artifactId>maven-source-plugin</artifactId>
+          </plugin>
+          <plugin>
+            <artifactId>maven-javadoc-plugin</artifactId>
+          </plugin>
+          <plugin>
+            <artifactId>maven-gpg-plugin</artifactId>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+  </profiles>
 
 </project>

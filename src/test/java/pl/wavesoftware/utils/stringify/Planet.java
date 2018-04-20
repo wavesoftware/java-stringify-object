@@ -1,6 +1,7 @@
 package pl.wavesoftware.utils.stringify;
 
 import lombok.Data;
+import pl.wavesoftware.utils.stringify.annotation.Inspect;
 
 /**
  * @author <a href="krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszyński</a>

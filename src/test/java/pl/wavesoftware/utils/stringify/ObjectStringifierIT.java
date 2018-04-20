@@ -1,5 +1,6 @@
 package pl.wavesoftware.utils.stringify;
 
+import org.junit.ClassRule;
 import org.junit.Test;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
@@ -13,6 +14,7 @@ import org.openjdk.jmh.runner.options.TimeValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import pl.wavesoftware.eid.exceptions.EidRuntimeException;
+import pl.wavesoftware.jmh.junit.utilities.JmhCleaner;
 
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
@@ -28,6 +30,9 @@ public class ObjectStringifierIT {
   private static final int OPERATIONS = 1000;
   private static final Logger LOG = LoggerFactory.getLogger(ObjectStringifierIT.class);
   private static final Planet TEST_OBJECT = new TestRepository().createTestPlanet();
+
+  @ClassRule
+  public static final JmhCleaner cleaner = new JmhCleaner(ObjectStringifierIT.class);;
 
   @Test
   public void doBenckmarking() throws RunnerException {

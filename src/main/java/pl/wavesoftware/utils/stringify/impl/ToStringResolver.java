@@ -1,10 +1,10 @@
 package pl.wavesoftware.utils.stringify.impl;
 
 import pl.wavesoftware.eid.utils.EidPreconditions;
-import pl.wavesoftware.utils.stringify.Inspect;
+import pl.wavesoftware.utils.stringify.annotation.Inspect;
 
 import java.lang.reflect.Field;
-import java.util.Date;
+import java.util.Arrays;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -16,13 +16,20 @@ import static pl.wavesoftware.eid.utils.EidPreconditions.tryToExecute;
  * @since 2018-04-18
  */
 public final class ToStringResolver {
-  private static final ClassLocator TEMPORAL_CLASS_LOCATOR =
-    new ClassLocator("java.time.temporal.Temporal");
-  private static final Object CONTAIN = new Object();
-  private static final JPALazyChecker LAZY_CHECKER = new JPALazyCheckerFacade();
+  private static final Iterable<ObjectInspector> OBJECT_INSPECTORS = Arrays.asList(
+    new CharSequenceInspector(),
+    new PrimitiveInspector(),
+    new CharacterInspector(),
+    new JPALazyInspector(),
+    new MapInspector(),
+    new IterableInspector(),
+    new RecursionInspector()
+  );
 
-  private final Map<Object, Object> resolved;
   private final Object target;
+  private final State state;
+  private final Function<Object, CharSequence> alternative;
+
 
   /**
    * A default constructor
@@ -30,13 +37,14 @@ public final class ToStringResolver {
    * @param target a target object to resolve
    */
   public ToStringResolver(Object target) {
-    this(target, new IdentityHashMap<>());
+    this(target, new StateImpl());
   }
 
   private ToStringResolver(Object target,
-                           Map<Object, Object> resolved) {
-    this.resolved = resolved;
-    this.target = inspecting(target);
+                           State state) {
+    this.state = state;
+    this.target = target;
+    this.alternative = new ObjectInspectorImpl();
   }
 
   /**
@@ -45,7 +53,7 @@ public final class ToStringResolver {
    * @return String representation
    */
   public CharSequence resolve() {
-    inspecting(target);
+    state.markIsInspected(target);
     StringBuilder sb = new StringBuilder();
     sb.append('<');
     sb.append(target.getClass().getSimpleName());
@@ -115,92 +123,51 @@ public final class ToStringResolver {
             properties.put(field.getName(), null);
           }
         } else {
-          properties.put(field.getName(), ToStringResolver.this.inspectObject(value));
+          properties.put(field.getName(), inspectObject(value));
         }
       }
     }, "20130422:154938");
   }
 
-  private Object inspecting(Object object) {
-    resolved.put(object, CONTAIN);
-    return object;
+  private CharSequence inspectObject(Object object) {
+    for (ObjectInspector inspector : OBJECT_INSPECTORS) {
+      if (inspector.consentTo(object, state)) {
+        return inspector.inspect(object, alternative);
+      }
+    }
+    ToStringResolver sub = new ToStringResolver(object, state);
+    return sub.resolve();
   }
 
-  private boolean wasInspected(Object object) {
-    return resolved.containsKey(object);
-  }
+  private final class ObjectInspectorImpl implements Function<Object, CharSequence> {
 
-  private CharSequence inspectObject(Object o) {
-    if (o instanceof CharSequence) {
-      return "\"" + o.toString() + "\"";
-    } else if (o instanceof Character) {
-      return "'" + o.toString() + "'";
-    } else if (isPrimitive(o)) {
-      return o.toString();
-    } else if (LAZY_CHECKER.isLazy(o)) {
-        return "⁂Lazy";
-    } else if (o instanceof Map) {
-      return inspectMap((Map<?,?>) o);
-    } else if (o instanceof Iterable) {
-      return inspectIterable((Iterable<?>) o);
-    } else if (wasInspected(o)) {
-      return "(↻)";
-    } else {
-      ToStringResolver sub = new ToStringResolver(o, resolved);
-      return sub.resolve();
+    @Override
+    public CharSequence apply(Object object) {
+      return inspectObject(object);
     }
   }
 
-  private static boolean isPrimitive(Object o) {
-    return o instanceof Number
-      || o instanceof Boolean
-      || o instanceof Enum
-      || isDatelike(o);
-  }
+  private static final class StateImpl implements State {
+    private static final Object CONTAIN = new Object();
 
-  private static boolean isDatelike(Object o) {
-    return o instanceof Date
-      || isInstanceOfTemporal(o);
-  }
+    private final Map<Object, Object> resolved;
 
-  private static boolean isInstanceOfTemporal(Object candidate) {
-    if (TEMPORAL_CLASS_LOCATOR.isAvailable()) {
-      Class<?> temporalCls = TEMPORAL_CLASS_LOCATOR.get();
-      return temporalCls.isInstance(candidate);
+    private StateImpl() {
+      this(new IdentityHashMap<>());
     }
-    return false;
-  }
 
-  private String inspectIterable(Iterable<?> iterable) {
-    StringBuilder sb = new StringBuilder();
-    sb.append("[");
-    for (Object elem : iterable) {
-      sb.append(inspectObject(elem));
-      sb.append(",");
+    private StateImpl(Map<Object, Object> resolved) {
+      this.resolved = resolved;
     }
-    if (sb.length() > 1) {
-      sb.deleteCharAt(sb.length() - 1);
-    }
-    sb.append("]");
-    return sb.toString();
-  }
 
-  private String inspectMap(Map<?, ?> map) {
-    StringBuilder sb = new StringBuilder();
-    sb.append("{");
-    for (Map.Entry<?, ?> entry : map.entrySet()) {
-      Object key = entry.getKey();
-      Object value = entry.getValue();
-      sb.append(inspectObject(key));
-      sb.append(": ");
-      sb.append(inspectObject(value));
-      sb.append(", ");
+    @Override
+    public boolean wasInspected(Object object) {
+      return resolved.containsKey(object);
     }
-    if (sb.length() > 1) {
-      sb.deleteCharAt(sb.length() - 1);
-      sb.deleteCharAt(sb.length() - 1);
+
+    @Override
+    public void markIsInspected(Object object) {
+      resolved.put(object, CONTAIN);
     }
-    sb.append("}");
-    return sb.toString();
   }
 }

@@ -2,6 +2,7 @@ package pl.wavesoftware.utils.stringify;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import pl.wavesoftware.utils.stringify.annotation.Inspect;
 
 import java.util.LinkedHashMap;
 import java.util.List;

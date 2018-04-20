@@ -1,6 +1,7 @@
 package pl.wavesoftware.utils.stringify;
 
 import lombok.RequiredArgsConstructor;
+import pl.wavesoftware.utils.stringify.annotation.Inspect;
 import pl.wavesoftware.utils.stringify.impl.ToStringResolver;
 
 /**
