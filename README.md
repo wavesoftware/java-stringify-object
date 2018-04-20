@@ -1,7 +1,9 @@
 
 # Stringify Object for Java
 
-[![Build Status](https://travis-ci.org/wavesoftware/java-stringify-object.svg?branch=master)](https://travis-ci.org/wavesoftware/java-stringify-object)
+[![Build Status](https://travis-ci.org/wavesoftware/java-stringify-object.svg?branch=master)](https://travis-ci.org/wavesoftware/java-stringify-object) [![Quality Gate](https://sonar.wavesoftware.pl/api/badges/gate?key=pl.wavesoftware.utils:stringify-object)](https://sonar.wavesoftware.pl/dashboard/index/pl.wavesoftware.utils:stringify-object) [![Coverage Status](https://coveralls.io/repos/github/wavesoftware/java-stringify-object/badge.svg?branch=master)](https://coveralls.io/github/wavesoftware/java-stringify-object?branch=master) 
+[![Maven Central](https://img.shields.io/maven-central/v/pl.wavesoftware.utils/stringify-object.svg)](https://bintray.com/bintray/jcenter/pl.wavesoftware.utils%3Astringify-object)
+
 
 A utility to safely inspect any Java Object as String representation. It's best to be used with JPA entity model to be dumped
 to log files.
