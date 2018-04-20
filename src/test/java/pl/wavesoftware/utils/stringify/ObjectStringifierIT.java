@@ -27,7 +27,6 @@ public class ObjectStringifierIT {
   private static final int PERCENT = 100;
   private static final int OPERATIONS = 1000;
   private static final Logger LOG = LoggerFactory.getLogger(ObjectStringifierIT.class);
-  private static final double SPEED_THRESHOLD = 0.02d;
   private static final Planet TEST_OBJECT = new TestRepository().createTestPlanet();
 
   @Test
@@ -62,8 +61,8 @@ public class ObjectStringifierIT {
     double eidScore = eid.getAggregatedResult().getPrimaryResult().getScore();
 
     String title = "method speed quotient to the control sample";
-    String eidTitle = String.format("%s %s should be at least %.2f%%", "#eid()",
-      title, SPEED_THRESHOLD * PERCENT);
+    String eidTitle = String.format("%s %s should be at least %.2f%%", "#stringifier()",
+      title, getSpeedThreshold() * PERCENT);
 
     double eidTimes = eidScore / controlScore;
 
@@ -71,7 +70,9 @@ public class ObjectStringifierIT {
     LOG.info("#stringifier() method time per operation: {} ops / µsec", eidScore);
     LOG.info("{} and is {}%", eidTitle, eidTimes * PERCENT);
 
-    assertThat(eidTimes).as(eidTitle).isGreaterThanOrEqualTo(SPEED_THRESHOLD);
+    assertThat(eidTimes)
+      .as(eidTitle)
+      .isGreaterThanOrEqualTo(getSpeedThreshold());
   }
 
   @Benchmark
@@ -86,6 +87,17 @@ public class ObjectStringifierIT {
   public void stringifier(Blackhole bh) {
     for (int i = 0; i < OPERATIONS; i++) {
       bh.consume(new ObjectStringifier(TEST_OBJECT).toString());
+    }
+  }
+
+  private static double getSpeedThreshold() {
+    double jreVersion = Double.parseDouble(System.getProperty("java.specification.version"));
+    if (jreVersion > 1.7d) {
+      // 10% performance of static lombok code for Java 8+
+      return 0.10d;
+    } else {
+      // 1.5% performance of static lombok code for Java 7
+      return 0.015d;
     }
   }
 
