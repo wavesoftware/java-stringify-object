@@ -35,9 +35,9 @@
   </developers>
 
   <scm>
-    <connection>scm:git:git://github.com/wavesoftware/java-stringify-object.git</connection>
-    <developerConnection>scm:git:ssh://github.com:wavesoftware/java-stringify-object.git</developerConnection>
-    <url>http://github.com/wavesoftware/java-stringify-object</url>
+    <connection>scm:git:https://github.com/wavesoftware/java-stringify-object.git</connection>
+    <developerConnection>scm:git:git@github.com:wavesoftware/java-stringify-object.git</developerConnection>
+    <url>https://github.com/wavesoftware/java-stringify-object</url>
   </scm>
 
   <issueManagement>
@@ -49,6 +49,17 @@
     <system>Travis CI</system>
     <url>https://travis-ci.org/wavesoftware/java-stringify-object</url>
   </ciManagement>
+
+  <distributionManagement>
+    <snapshotRepository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/content/repositories/snapshots</url>
+    </snapshotRepository>
+    <repository>
+      <id>ossrh</id>
+      <url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
 
   <properties>
     <netbeans.hint.license>apache20</netbeans.hint.license>
