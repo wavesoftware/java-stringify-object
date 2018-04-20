@@ -1,5 +1,8 @@
 package pl.wavesoftware.utils.stringify.impl;
 
+import pl.wavesoftware.eid.utils.EidPreconditions;
+
+import javax.annotation.Nonnull;
 import java.lang.reflect.Method;
 
 import static pl.wavesoftware.eid.utils.EidPreconditions.tryToExecute;
@@ -14,23 +17,35 @@ final class HibernateLazyChecker implements JPALazyChecker {
   private static Method isInitializedMethod;
 
   static boolean isSuitable() {
-    return HIBERNATE_LOCATOR.isAvialable();
+    return HIBERNATE_LOCATOR.isAvailable();
   }
 
   @Override
-  public boolean isLazy(Object candidate) {
+  public boolean isLazy(final Object candidate) {
     Class<?> cls = HIBERNATE_LOCATOR.get();
-    Method method = getIsInitializedMethod(cls);
+    final Method method = getIsInitializedMethod(cls);
     return !tryToExecute(
-      () -> Boolean.class.cast(method.invoke(null, candidate)),
+      new EidPreconditions.UnsafeSupplier<Boolean>() {
+        @Override
+        @Nonnull
+        public Boolean get() throws Exception {
+          return Boolean.class.cast(method.invoke(null, candidate));
+        }
+      },
       "20180418:231314"
     );
   }
 
-  private static Method getIsInitializedMethod(Class<?> hibernateClass) {
+  private static Method getIsInitializedMethod(final Class<?> hibernateClass) {
     if (isInitializedMethod == null) {
       isInitializedMethod = tryToExecute(
-        () -> hibernateClass.getDeclaredMethod("isInitialized", Object.class),
+        new EidPreconditions.UnsafeSupplier<Method>() {
+          @Override
+          @Nonnull
+          public Method get() throws Exception {
+            return hibernateClass.getDeclaredMethod("isInitialized", Object.class);
+          }
+        },
         "20180418:231029"
       );
     }

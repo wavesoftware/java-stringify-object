@@ -2,14 +2,19 @@ package pl.wavesoftware.utils.stringify.impl;
 
 import lombok.NoArgsConstructor;
 
-import java.util.Optional;
-
 /**
  * @author <a href="krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszyński</a>
  * @since 2018-04-18
  */
 @NoArgsConstructor
 final class JPALazyCheckerFacade implements JPALazyChecker {
+  private static final JPALazyChecker NOOP_CHECKER = new JPALazyChecker() {
+    @Override
+    public boolean isLazy(Object candidate) {
+      return false;
+    }
+  };
+
   private JPALazyChecker lazyChecker;
 
   @Override
@@ -19,14 +24,16 @@ final class JPALazyCheckerFacade implements JPALazyChecker {
   }
 
   private JPALazyChecker getImpl() {
-    return Optional.ofNullable(lazyChecker)
-      .orElseGet(JPALazyCheckerFacade::resolveImpl);
+    if (lazyChecker == null) {
+      lazyChecker = resolveImpl();
+    }
+    return lazyChecker;
   }
 
   private static JPALazyChecker resolveImpl() {
     if (HibernateLazyChecker.isSuitable()) {
       return new HibernateLazyChecker();
     }
-    return candidate -> false;
+    return NOOP_CHECKER;
   }
 }

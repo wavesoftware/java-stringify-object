@@ -12,5 +12,5 @@ import java.util.List;
 @Data
 final class PlanetSystem {
   @Inspect
-  private final List<Planet> planets = new ArrayList<>();
+  private List<Planet> planets = new ArrayList<>();
 }

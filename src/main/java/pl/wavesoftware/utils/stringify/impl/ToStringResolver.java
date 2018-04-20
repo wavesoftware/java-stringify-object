@@ -1,9 +1,9 @@
 package pl.wavesoftware.utils.stringify.impl;
 
+import pl.wavesoftware.eid.utils.EidPreconditions;
 import pl.wavesoftware.utils.stringify.Inspect;
 
 import java.lang.reflect.Field;
-import java.time.temporal.Temporal;
 import java.util.Date;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
@@ -16,6 +16,8 @@ import static pl.wavesoftware.eid.utils.EidPreconditions.tryToExecute;
  * @since 2018-04-18
  */
 public final class ToStringResolver {
+  private static final ClassLocator TEMPORAL_CLASS_LOCATOR =
+    new ClassLocator("java.time.temporal.Temporal");
   private static final Object CONTAIN = new Object();
   private static final JPALazyChecker LAZY_CHECKER = new JPALazyCheckerFacade();
 
@@ -101,17 +103,20 @@ public final class ToStringResolver {
     }
   }
 
-  private void inspectAnnotatedField(Map<String, String> properties,
-                                     Field field,
-                                     Inspect inspect) {
-    tryToExecute(() -> {
-      Object value = field.get(target);
-      if (value == null) {
-        if (inspect.showNull()) {
-          properties.put(field.getName(), null);
+  private void inspectAnnotatedField(final Map<String, String> properties,
+                                     final Field field,
+                                     final Inspect inspect) {
+    tryToExecute(new EidPreconditions.UnsafeProcedure() {
+      @Override
+      public void execute() throws Exception {
+        Object value = field.get(target);
+        if (value == null) {
+          if (inspect.showNull()) {
+            properties.put(field.getName(), null);
+          }
+        } else {
+          properties.put(field.getName(), ToStringResolver.this.inspectObject(value));
         }
-      } else {
-        properties.put(field.getName(), inspectObject(value));
       }
     }, "20130422:154938");
   }
@@ -155,7 +160,15 @@ public final class ToStringResolver {
 
   private static boolean isDatelike(Object o) {
     return o instanceof Date
-      || o instanceof Temporal;
+      || isInstanceOfTemporal(o);
+  }
+
+  private static boolean isInstanceOfTemporal(Object candidate) {
+    if (TEMPORAL_CLASS_LOCATOR.isAvailable()) {
+      Class<?> temporalCls = TEMPORAL_CLASS_LOCATOR.get();
+      return temporalCls.isInstance(candidate);
+    }
+    return false;
   }
 
   private String inspectIterable(Iterable<?> iterable) {

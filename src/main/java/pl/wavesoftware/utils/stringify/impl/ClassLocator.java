@@ -1,10 +1,10 @@
 package pl.wavesoftware.utils.stringify.impl;
 
 import lombok.RequiredArgsConstructor;
-import pl.wavesoftware.eid.exceptions.Eid;
-import pl.wavesoftware.eid.exceptions.EidIllegalStateException;
 
-import java.util.Optional;
+import javax.annotation.Nullable;
+
+import static pl.wavesoftware.eid.utils.EidPreconditions.checkNotNull;
 
 /**
  * @author <a href="krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszyński</a>
@@ -17,18 +17,17 @@ final class ClassLocator {
   private Class<?> targetClass;
   private boolean located;
 
-  boolean isAvialable() {
-    return getTargetClass()
-      .isPresent();
+  boolean isAvailable() {
+    return getTargetClass() != null;
   }
 
   Class<?> get() {
-    return getTargetClass()
-      .orElseThrow(() -> new EidIllegalStateException(new Eid("20180418:230411")));
+    return checkNotNull(getTargetClass(), "20180418:230411");
   }
 
   @SuppressWarnings({"squid:S1166", "squid:S2658"})
-  private Optional<Class<?>> getTargetClass() {
+  @Nullable
+  private Class<?> getTargetClass() {
     if (!located) {
       ClassLoader cl = Thread
         .currentThread()
@@ -40,6 +39,6 @@ final class ClassLocator {
       }
       located = true;
     }
-    return Optional.ofNullable(targetClass);
+    return targetClass;
   }
 }
