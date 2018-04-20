@@ -9,7 +9,7 @@
   <version>0.1.0-SNAPSHOT</version>
   <packaging>jar</packaging>
 
-  <name>stringify-object</name>
+  <name>Stringify Object for Java</name>
   <description>A utility to safely inspect any Java Object as string representation</description>
   <url>https://github.com/wavesoftware/java-stringify-object</url>
 
@@ -302,7 +302,39 @@
     </profile>
 
     <profile>
-      <id>sonar</id>
+      <id>sonar-publish</id>
+      <activation>
+        <property>
+          <name>env.SONAR</name>
+          <value>publish</value>
+        </property>
+      </activation>
+      <build>
+        <plugins>
+          <plugin>
+            <groupId>org.jacoco</groupId>
+            <artifactId>jacoco-maven-plugin</artifactId>
+          </plugin>
+
+          <plugin>
+            <groupId>org.sonarsource.scanner.maven</groupId>
+            <artifactId>sonar-maven-plugin</artifactId>
+            <executions>
+              <execution>
+                <id>default</id>
+                <phase>post-integration-test</phase>
+                <goals>
+                  <goal>sonar</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+        </plugins>
+      </build>
+    </profile>
+
+    <profile>
+      <id>sonar-for-developer</id>
       <activation>
         <property>
           <!-- tries to determine is interactive user session -->

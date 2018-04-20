@@ -14,20 +14,12 @@ final class PrimitiveInspector implements ObjectInspector {
   @Override
   public boolean consentTo(Object candidate,
                            State state) {
-    return consentTo(candidate);
+    return isPrimitive(candidate);
   }
 
   @Override
   public CharSequence inspect(Object object,
                               Function<Object, CharSequence> alternative) {
-    return inspect(object);
-  }
-
-  private boolean consentTo(Object candidate) {
-    return isPrimitive(candidate);
-  }
-
-  private CharSequence inspect(Object object) {
     return object.toString();
   }
 
