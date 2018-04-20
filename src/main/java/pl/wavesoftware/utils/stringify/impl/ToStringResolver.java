@@ -44,27 +44,27 @@ public final class ToStringResolver {
    *
    * @return String representation
    */
-  public String resolve() {
+  public CharSequence resolve() {
     inspecting(target);
     StringBuilder sb = new StringBuilder();
     sb.append('<');
     sb.append(target.getClass().getSimpleName());
-    String props = propertiesForToString();
-    if (!"".equals(props)) {
+    CharSequence props = propertiesForToString();
+    if (props.length() != 0) {
       sb.append(' ');
       sb.append(props);
     }
     sb.append('>');
-    return sb.toString();
+    return sb;
   }
 
-  private String propertiesForToString() {
-    Map<String, String> props;
+  private CharSequence propertiesForToString() {
+    Map<String, CharSequence> props;
     props = inspectTargetAsClass(target.getClass());
     StringBuilder sb = new StringBuilder();
-    for (Map.Entry<String, String> entry : props.entrySet()) {
+    for (Map.Entry<String, CharSequence> entry : props.entrySet()) {
       String fieldName = entry.getKey();
-      String fieldStringValue = entry.getValue();
+      CharSequence fieldStringValue = entry.getValue();
       sb.append(fieldName);
       sb.append("=");
       sb.append(fieldStringValue);
@@ -74,12 +74,12 @@ public final class ToStringResolver {
       sb.deleteCharAt(sb.length() - 1);
       sb.deleteCharAt(sb.length() - 1);
     }
-    return sb.toString();
+    return sb;
   }
 
-  private Map<String, String> inspectTargetAsClass(Class<?> type) {
+  private Map<String, CharSequence> inspectTargetAsClass(Class<?> type) {
     Class<?> supertype = type.getSuperclass();
-    Map<String, String> props;
+    Map<String, CharSequence> props;
     if (supertype == null || supertype.equals(Object.class)) {
       props = new LinkedHashMap<>();
     } else {
@@ -90,7 +90,7 @@ public final class ToStringResolver {
   }
 
   private void inspectFields(Field[] fields,
-                             Map<String, String> properties) {
+                             Map<String, CharSequence> properties) {
     for (Field field : fields) {
       boolean accessable = field.isAccessible();
       if (!accessable) {
@@ -103,7 +103,7 @@ public final class ToStringResolver {
     }
   }
 
-  private void inspectAnnotatedField(final Map<String, String> properties,
+  private void inspectAnnotatedField(final Map<String, CharSequence> properties,
                                      final Field field,
                                      final Inspect inspect) {
     tryToExecute(new EidPreconditions.UnsafeProcedure() {
@@ -130,8 +130,8 @@ public final class ToStringResolver {
     return resolved.containsKey(object);
   }
 
-  private String inspectObject(Object o) {
-    if (o instanceof String) {
+  private CharSequence inspectObject(Object o) {
+    if (o instanceof CharSequence) {
       return "\"" + o.toString() + "\"";
     } else if (o instanceof Character) {
       return "'" + o.toString() + "'";

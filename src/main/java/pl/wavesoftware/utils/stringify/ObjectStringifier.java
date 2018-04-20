@@ -15,7 +15,12 @@ public final class ObjectStringifier {
    *
    * @return a string representation of given object
    */
-  public String toString() {
+  public CharSequence stringify() {
     return new ToStringResolver(target).resolve();
+  }
+
+  @Override
+  public String toString() {
+    return stringify().toString();
   }
 }
