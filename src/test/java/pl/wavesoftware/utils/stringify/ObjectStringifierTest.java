@@ -31,6 +31,7 @@ public class ObjectStringifierTest {
       " \"1972\": [\"Apollo 16\",\"Apollo 17\"]}>, dayOfYear=14, type='A'>", repr);
   }
 
+  @SuppressWarnings("unchecked")
   private Planet createTestPlanet() {
     PlanetSystem earthPlanetSystem = new PlanetSystem();
     Moon moon = new Moon(Phase.FULL_MOON);
