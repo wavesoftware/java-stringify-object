@@ -1,6 +1,6 @@
 language: java
 jdk:
-  - oraclejdk7
-  - oraclejdk8
+  - openjdk7
+  - openjdk8
   - oraclejdk9
 script: ./mvnw verify
