@@ -2,7 +2,7 @@ package pl.wavesoftware.utils.stringify;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import pl.wavesoftware.utils.stringify.annotation.Inspect;
+import pl.wavesoftware.utils.stringify.configuration.Inspect;
 
 /**
  * @author <a href="krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszyński</a>
@@ -17,6 +17,7 @@ final class Earth extends Planet {
   private int dayOfYear;
   @Inspect
   private char type;
+
 
   Earth() {
     super(true, "Earth");
