@@ -1,12 +1,13 @@
 package pl.wavesoftware.utils.stringify.impl;
 
+import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 
 /**
  * @author <a href="krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszyński</a>
  * @since 2018-04-18
  */
-@NoArgsConstructor
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
 final class JPALazyCheckerFacade implements JPALazyChecker {
   private static final JPALazyChecker NOOP_CHECKER = new JPALazyChecker() {
     @Override
