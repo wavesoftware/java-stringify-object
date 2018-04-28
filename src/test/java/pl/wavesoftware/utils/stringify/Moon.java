@@ -2,7 +2,8 @@ package pl.wavesoftware.utils.stringify;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import pl.wavesoftware.utils.stringify.annotation.Inspect;
+import lombok.ToString;
+import pl.wavesoftware.utils.stringify.configuration.Inspect;
 
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -13,12 +14,15 @@ import java.util.Map;
  * @since 2018-04-18
  */
 @Data
+@ToString(exclude = "nullinside")
 @EqualsAndHashCode(callSuper = true)
 final class Moon extends Planet {
   @Inspect
   private Phase phase;
   @Inspect
   private Map<String, List<String>> visits = new LinkedHashMap<>();
+  @Inspect
+  private Object nullinside;
 
   Moon(Phase phase) {
     super(null, "Moon");

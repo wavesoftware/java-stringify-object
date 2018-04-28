@@ -4,7 +4,7 @@
 
   <groupId>pl.wavesoftware.utils</groupId>
   <artifactId>stringify-object</artifactId>
-  <version>0.1.0</version>
+  <version>1.0.0</version>
   <packaging>jar</packaging>
 
   <name>Stringify Object for Java</name>
@@ -147,9 +147,9 @@
           <version>3.4.0.905</version>
         </plugin>
         <plugin>
-          <groupId>external.atlassian.jgitflow</groupId>
+          <groupId>com.manamind.jgitflow</groupId>
           <artifactId>jgitflow-maven-plugin</artifactId>
-          <version>1.0-m5.1</version>
+          <version>1.0.0</version>
           <configuration>
             <enableSshAgent>true</enableSshAgent>
             <flowInitContext>

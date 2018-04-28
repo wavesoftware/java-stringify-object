@@ -1,5 +1,6 @@
 package pl.wavesoftware.utils.stringify.impl;
 
+import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 
 import javax.annotation.Nullable;
@@ -10,7 +11,7 @@ import static pl.wavesoftware.eid.utils.EidPreconditions.checkNotNull;
  * @author <a href="krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszyński</a>
  * @since 2018-04-18
  */
-@RequiredArgsConstructor
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
 final class ClassLocator {
 
   private final String fqcn;

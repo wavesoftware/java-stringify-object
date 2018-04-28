@@ -3,6 +3,6 @@
  * @since 20.04.18
  */
 @ParametersAreNonnullByDefault
-package pl.wavesoftware.utils.stringify.annotation;
+package pl.wavesoftware.utils.stringify.configuration;
 
 import javax.annotation.ParametersAreNonnullByDefault;

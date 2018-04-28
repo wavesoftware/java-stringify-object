@@ -97,8 +97,11 @@ public class ObjectStringifierIT {
 
   private static double getSpeedThreshold() {
     double jreVersion = Double.parseDouble(System.getProperty("java.specification.version"));
-    if (jreVersion > 1.7d) {
-      // 8% performance of static lombok code for Java 8+
+    if (jreVersion >= 9d) {
+      // 5% performance of static lombok code for Java 9+
+      return 0.05d;
+    } else if (jreVersion >= 1.8d) {
+      // 8% performance of static lombok code for Java 8
       return 0.08d;
     } else {
       // 1% performance of static lombok code for Java 7
