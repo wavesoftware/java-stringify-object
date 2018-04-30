@@ -17,6 +17,9 @@ import java.util.Map;
 @ToString(exclude = "nullinside")
 @EqualsAndHashCode(callSuper = true)
 final class Moon extends Planet {
+
+  private static final long serialVersionUID = 20180430201602L;
+
   @Inspect
   private Phase phase;
   @Inspect

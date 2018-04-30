@@ -11,6 +11,9 @@ import pl.wavesoftware.utils.stringify.configuration.Inspect;
 @Data
 @EqualsAndHashCode(callSuper = true)
 final class Earth extends Planet {
+
+  private static final long serialVersionUID = 20180430201544L;
+
   @Inspect
   private Moon moon;
   @Inspect
