@@ -4,9 +4,11 @@ package pl.wavesoftware.utils.stringify;
 import lombok.RequiredArgsConstructor;
 import org.junit.Test;
 import pl.wavesoftware.utils.stringify.configuration.AlwaysTruePredicate;
-import pl.wavesoftware.utils.stringify.configuration.Mode;
-import pl.wavesoftware.utils.stringify.configuration.Predicate;
 import pl.wavesoftware.utils.stringify.configuration.BeanFactory;
+import pl.wavesoftware.utils.stringify.configuration.InspectionPoint;
+import pl.wavesoftware.utils.stringify.configuration.Mode;
+import pl.wavesoftware.utils.stringify.lang.Predicate;
+import pl.wavesoftware.utils.stringify.lang.Supplier;
 
 import java.lang.reflect.Field;
 import java.util.AbstractMap;
@@ -72,7 +74,7 @@ public class ObjectStringifierTest {
   }
 
   @Test
-  public void testWithCustomPredicate() throws NoSuchFieldException {
+  public void testWithCustomPredicate() {
     // given
     SimpleUser user = testRepository.createTestSimpleUser();
     ObjectStringifier stringifier = new ObjectStringifier(user);
@@ -87,8 +89,24 @@ public class ObjectStringifierTest {
     assertEquals("<SimpleUser login=\"llohan\">", productionResult);
     assertEquals("<SimpleUser login=\"llohan\", password=\"1234567890\", phoneNumber=\"555-123-445\">",
       developmentResult);
+
     assertTrue(new AlwaysTruePredicate().test(
-      this.getClass().getDeclaredField("testRepository")
+      new InspectionPoint() {
+        @Override
+        public Field getField() {
+          return null;
+        }
+
+        @Override
+        public Object getContainingObject() {
+          return null;
+        }
+
+        @Override
+        public Supplier<Object> getValueSupplier() {
+          return null;
+        }
+      }
     ));
   }
 
@@ -134,12 +152,55 @@ public class ObjectStringifierTest {
       "childs=[(↻)], account=⁂Lazy>, childs=[], account=⁂Lazy>", productionResult);
   }
 
+  @Test
+  public void testOnPersonWithCustomPerdicateLogic() {
+    // given
+    Person person = testRepository.createPerson();
+    ObjectStringifier stringifier = new ObjectStringifier(person);
+    IsInDevelopment isInDevelopment = new IsInDevelopmentPredicate(new Predicate<Object>() {
+      @Override
+      public boolean test(Object value) {
+        return value instanceof String
+          && ((String) value).contains("!@#$");
+      }
+    });
+    BeanFactory productionBeanFactory = getBeanFactory(isInDevelopment);
+    stringifier.setBeanFactory(productionBeanFactory);
+
+    // when
+    String productionResult = stringifier.toString();
+
+    // then
+    assertEquals("<Person id=15, parent=<Person id=16, parent=null, " +
+      "childs=[(↻)], account=⁂Lazy, password=\"!@#$4321qwer\">, childs=[], " +
+      "account=⁂Lazy>", productionResult);
+  }
+
+  private static boolean inspectionPointValue(final InspectionPoint inspectionPoint,
+                                              final Predicate<Object> predicate) {
+    return predicate.test(
+      inspectionPoint
+        .getValueSupplier()
+        .get()
+    );
+  }
+
   private StaticBeanFactory getBeanFactory(IsInDevelopment isInDevelopmentFalse) {
     return new StaticBeanFactory(
-      new AbstractMap.SimpleImmutableEntry<Class<?>, Predicate<Field>>(
+      new AbstractMap.SimpleImmutableEntry<Class<?>, Predicate<InspectionPoint>>(
         IsInDevelopment.class, isInDevelopmentFalse
       )
     );
+  }
+
+  @RequiredArgsConstructor
+  private static final class IsInDevelopmentPredicate implements IsInDevelopment {
+    private final Predicate<Object> predicate;
+
+    @Override
+    public boolean test(InspectionPoint inspectionPoint) {
+      return inspectionPointValue(inspectionPoint, predicate);
+    }
   }
 
   @RequiredArgsConstructor
@@ -147,7 +208,7 @@ public class ObjectStringifierTest {
     private final boolean development;
 
     @Override
-    public boolean test(Field field) {
+    public boolean test(InspectionPoint point) {
       return development;
     }
   }
@@ -156,8 +217,8 @@ public class ObjectStringifierTest {
     private final Map<Class<?>, Object> instances = new HashMap<>();
 
     @SafeVarargs
-    StaticBeanFactory(Map.Entry<Class<?>, Predicate<Field>>... entries) {
-      for (Map.Entry<Class<?>, Predicate<Field>> entry : entries) {
+    StaticBeanFactory(Map.Entry<Class<?>, Predicate<InspectionPoint>>... entries) {
+      for (Map.Entry<Class<?>, Predicate<InspectionPoint>> entry : entries) {
         instances.put(entry.getKey(), entry.getValue());
       }
     }
