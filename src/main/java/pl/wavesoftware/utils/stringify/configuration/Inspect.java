@@ -1,10 +1,11 @@
 package pl.wavesoftware.utils.stringify.configuration;
 
+import pl.wavesoftware.utils.stringify.lang.Predicate;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.lang.reflect.Field;
 
 /**
  * If {@link Mode} is set to {@link Mode#QUIET} (by default), this annotation
@@ -24,5 +25,5 @@ public @interface Inspect {
    *
    * @return a class of predicate to be used to determine if field should be inspected
    */
-  Class<? extends Predicate<Field>> conditionally() default AlwaysTruePredicate.class;
+  Class<? extends Predicate<InspectionPoint>> conditionally() default AlwaysTruePredicate.class;
 }
