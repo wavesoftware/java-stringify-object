@@ -4,7 +4,7 @@
 
   <groupId>pl.wavesoftware.utils</groupId>
   <artifactId>stringify-object</artifactId>
-  <version>1.0.1-SNAPSHOT</version>
+  <version>1.0.1</version>
   <packaging>jar</packaging>
 
   <name>Stringify Object for Java</name>
