@@ -13,9 +13,9 @@ import java.util.List;
  */
 @Setter
 class Person {
-  private int id;
+  private volatile int id;
   @DisplayNull
-  private Person parent;
+  private transient Person parent;
   private List<Person> childs;
   private Account account;
   @Inspect(conditionally = IsInDevelopment.class)
