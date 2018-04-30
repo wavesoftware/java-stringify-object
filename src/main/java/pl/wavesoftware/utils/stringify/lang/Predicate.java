@@ -1,4 +1,4 @@
-package pl.wavesoftware.utils.stringify.configuration;
+package pl.wavesoftware.utils.stringify.lang;
 
 /**
  * Represents a predicate (boolean-valued function) of one argument.

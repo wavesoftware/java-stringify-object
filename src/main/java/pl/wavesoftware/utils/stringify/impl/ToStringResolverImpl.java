@@ -1,6 +1,7 @@
 package pl.wavesoftware.utils.stringify.impl;
 
 import pl.wavesoftware.eid.utils.EidPreconditions;
+import pl.wavesoftware.utils.stringify.configuration.InspectionPoint;
 import pl.wavesoftware.utils.stringify.configuration.Mode;
 import pl.wavesoftware.utils.stringify.configuration.BeanFactory;
 
@@ -120,11 +121,16 @@ final class ToStringResolverImpl implements ToStringResolver {
   private void inspectFields(Field[] fields,
                              Map<String, CharSequence> properties) {
     for (Field field : fields) {
-      InspectingField inspectingField = inspectingFieldFactory.create(field, beanFactory);
+      InspectionPoint inspectionPoint = createInspectionPoint(field);
+      InspectingField inspectingField = inspectingFieldFactory.create(inspectionPoint, beanFactory);
       if (inspectingField.shouldInspect()) {
         inspectAnnotatedField(properties, field, inspectingField);
       }
     }
+  }
+
+  private InspectionPoint createInspectionPoint(Field field) {
+    return new InspectionPointImpl(field, target);
   }
 
   private void inspectAnnotatedField(final Map<String, CharSequence> properties,
