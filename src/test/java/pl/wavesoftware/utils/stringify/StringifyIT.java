@@ -1,7 +1,23 @@
+/*
+ * Copyright 2018-2019 Wave Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package pl.wavesoftware.utils.stringify;
 
-import org.junit.ClassRule;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.openjdk.jmh.annotations.Benchmark;
 import org.openjdk.jmh.annotations.Mode;
 import org.openjdk.jmh.infra.Blackhole;
@@ -25,21 +41,21 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
  * @since 20.04.18
  */
-public class ObjectStringifierIT {
+public class StringifyIT {
   private static final int PERCENT = 100;
   private static final int OPERATIONS = 1000;
-  private static final Logger LOG = LoggerFactory.getLogger(ObjectStringifierIT.class);
+  private static final Logger LOG = LoggerFactory.getLogger(StringifyIT.class);
   private static final Planet TEST_OBJECT = new TestRepository().createTestPlanet();
 
-  @ClassRule
-  public static final JmhCleaner cleaner = new JmhCleaner(ObjectStringifierIT.class);;
+  @RegisterExtension
+  static final JmhCleaner cleaner = new JmhCleaner(StringifyIT.class);
 
   @Test
-  public void doBenckmarking() throws RunnerException {
+  void doBenckmarking() throws RunnerException {
     Options opt = new OptionsBuilder()
       .include(this.getClass().getName() + ".*")
       .mode(Mode.Throughput)
-      .timeUnit(TimeUnit.MICROSECONDS)
+      .timeUnit(TimeUnit.MILLISECONDS)
       .operationsPerInvocation(OPERATIONS)
       .warmupTime(TimeValue.seconds(1))
       .warmupIterations(2)
@@ -49,8 +65,8 @@ public class ObjectStringifierIT {
       .forks(1)
       .shouldFailOnError(true)
       .shouldDoGC(true)
-      .jvmArgs("-server", "-Xms256m", "-Xmx256m",
-        "-XX:PermSize=128m", "-XX:MaxPermSize=128m", "-XX:+UseParallelGC")
+      .jvmArgs("-Xms256m", "-Xmx256m", "-XX:+UseG1GC", "-XX:+AggressiveOpts",
+        "-XX:+OptimizeStringConcat", "-XX:+UseStringDeduplication")
       .build();
 
     Runner runner = new Runner(opt);
@@ -71,8 +87,8 @@ public class ObjectStringifierIT {
 
     double eidTimes = eidScore / controlScore;
 
-    LOG.info("Control sample method time per operation: {} ops / µsec", controlScore);
-    LOG.info("#stringifier() method time per operation: {} ops / µsec", eidScore);
+    LOG.info("Control sample method time per operation: {} ops / ms", controlScore);
+    LOG.info("#stringifier() method time per operation: {} ops / ms", eidScore);
     LOG.info("{} and is {}%", eidTitle, eidTimes * PERCENT);
 
     assertThat(eidTimes)
@@ -91,7 +107,7 @@ public class ObjectStringifierIT {
   @Benchmark
   public void stringifier(Blackhole bh) {
     for (int i = 0; i < OPERATIONS; i++) {
-      bh.consume(new ObjectStringifier(TEST_OBJECT).toString());
+      bh.consume(Stringify.of(TEST_OBJECT).toString());
     }
   }
 
@@ -110,7 +126,7 @@ public class ObjectStringifierIT {
   }
 
   private static RunResult getRunResultByName(Collection<RunResult> results, String name) {
-    String fullName = String.format("%s.%s", ObjectStringifierIT.class.getName(), name);
+    String fullName = String.format("%s.%s", StringifyIT.class.getName(), name);
     for (RunResult result : results) {
       if (result.getParams().getBenchmark().equals(fullName)) {
         return result;
