@@ -1,0 +1,230 @@
+== Stringify Object for Java
+
+https://travis-ci.org/wavesoftware/java-stringify-object[image:https://travis-ci.org/wavesoftware/java-stringify-object.svg?branch=master[Build
+Status]]
+https://sonar.wavesoftware.pl/dashboard/index/pl.wavesoftware.utils:stringify-object[image:https://sonar.wavesoftware.pl/api/badges/gate?key=pl.wavesoftware.utils:stringify-object[Quality
+Gate]]
+https://coveralls.io/github/wavesoftware/java-stringify-object?branch=master[image:https://coveralls.io/repos/github/wavesoftware/java-stringify-object/badge.svg?branch=master[Coverage
+Status]]
+https://bintray.com/bintray/jcenter/pl.wavesoftware.utils%3Astringify-object[image:https://img.shields.io/maven-central/v/pl.wavesoftware.utils/stringify-object.svg[Maven
+Central]]
+
+A utility to safely inspect any Java Object as String representation.
+It's best to be used with domain model (also with JPA entities) with
+intention to dump those entities as text to log files.
+
+It runs in two modes: `+PROMISCUOUS+` (by default) and `+QUIET+`. In
+`+PROMISCUOUS+` mode every defined field is automatically inspected,
+unless the field is annotated with `+@DoNotInspect+` annotation. In
+`+QUIET+` mode only fields annotated with `+@Inspect+` will gets
+inspected.
+
+This library has proper support for object graph cycles, and JPA
+(Hibernate) lazy loaded elements.
+
+=== Usage
+
+==== In Promiscuous mode
+
+[source,java]
+----
+// In PROMISCUOUS mode define fields to exclude
+class Person {
+  private int id;
+  @DisplayNull
+  private Person parent;
+  private List<Person> childs;
+  private Account account;
+  @Inspect(conditionally = IsInDevelopment.class)
+  private String password;
+  @DoNotInspect
+  private String ignored;
+}
+  
+// inspect an object  
+List<Person> people = query.getResultList();  
+Stringify stringify = Stringify.of(people);
+stringify.mode(Mode.PROMISCUOUS);
+// stringify.beanFactory(...);
+assert "<Person id=15, parent=<Person id=16, parent=null, "  
+ + "childs=[(↻)], account=⁂Lazy>, childs=[], "  
+ + "account=⁂Lazy>".equals(stringify.toString());  
+----
+
+==== In Quiet mode
+
+[source,java]
+----
+// In QUIET mode define fields to inspect  
+class Person {  
+  @Inspect private int id;
+  @Inspect @DisplayNull private Person parent;
+  @Inspect private List<Person> childs;
+  @Inspect private Account account;
+  private String ignored;
+}
+  
+// inspect an object  
+List<Person> people = query.getResultList();  
+Stringify stringify = Stringify.of(people);
+stringify.mode(Mode.QUIET);
+assert "<Person id=15, parent=<Person id=16, parent=null, "  
+ + "childs=[(↻)], account=⁂Lazy>, childs=[], "  
+ + "account=⁂Lazy>".equals(stringify.toString());  
+----
+
+=== Features
+
+* String representation of any Java class in two modes `+PROMISCUOUS+`
+and `+QUIET+`
+* Fine tuning of which fields to display
+* Support for cycles in object graph - `+(↻)+` is displayed instead
+* Support for Hibernate lazy loaded entities - `+⁂Lazy+` is displayed
+instead
+
+[[vs-lombok-tostring]]
+=== vs. Lombok @ToString
+
+Stringify Object for Java is designed for *slightly different* use case
+then Lombok.
+
+Lombok `+@ToString+` is designed to quickly inspect fields of simple
+objects by generating static simple implementation of this mechanism.
+
+Stringify Object for Java is designed to inspect complex objects that
+can have cycles and can be managed by JPA provider like Hibernate
+(introducing Lazy Loading problems).
+
+==== Pros of Lombok vs Stringify Object
+
+* Lombok is *fast* - it's statically generated code without using
+Reflection API.
+* Lombok is *easy* - it's zero configuration in most cases.
+
+==== Cons of Lombok vs Stringify Object
+
+* Lombok can't *detect cycles* is object graph, which implies
+`+StackOverflowException+` being thrown in that case
+* Lombok can't detect a *lazy loaded entities*, which leads to force
+loading it from JPA by invoking SQL statements. It's typical *n+1
+problem*, but with nasty consequences - your `+toString()+` method is
+invoking SQL without your knowledge!!
+
+=== Configuration
+
+Configuration is done in two ways: declarative - using Java's service
+loader mechanism, and programmatic.
+
+==== Configuration using Service Loader
+
+A `+Configurator+` interface is intended to be implemented in user code,
+and assigned to https://www.baeldung.com/java-spi[Service Loader]
+mechanism.
+
+To do that, create on your classpath, a file:
+
+`+/META-INF/services/pl.wavesoftware.utils.stringify.spi.Configurator+`
+
+In that file, place a fully qualified class name of your class that
+implements `+Configurator+` interface. It should be called first time
+you use an Stringify to inspect an object:
+
+....
+# classpath:/META-INF/services/pl.wavesoftware.utils.stringify.spi.Configurator
+org.acmecorp.StringifyConfigurator
+....
+
+Then implement that class in your code:
+
+[source,java]
+----
+package org.acmecorp;
+
+import pl.wavesoftware.utils.stringify.api.Configuration;
+import pl.wavesoftware.utils.stringify.spi.Configurator;
+
+public final class StringifyConfigurator implements Configurator {
+  
+  @Override
+  public void configure(Configuration configuration) {
+    configuration.beanFactory(new SpringBeanFactory());
+  }
+}
+----
+
+with example Spring based BeanFactory:
+
+[source,java]
+----
+package org.acmecorp;
+
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Configuration;
+
+import pl.wavesoftware.utils.stringify.spi.BeanFactory;
+import pl.wavesoftware.utils.stringify.spi.BootingAware;
+
+@Configuration
+class SpringBeanFactory implements BeanFactory, BootingAware {
+  private static ApplicationContext context;
+  
+  @EventListener(ContextRefreshedEvent.class)
+  void onRefresh(ContextRefreshedEvent event) {
+    SpringBeanFactory.context = event.getApplicationContext();
+  }
+  
+  @Override
+  public <T> T create(Class<T> contractClass) {
+    return SpringBeanFactory.context.getBean(contractClass);
+  }
+
+  @Override
+  public boolean isReady() {
+    return SpringBeanFactory.context != null;
+  }
+}
+----
+
+==== Programmatic configuration
+
+You can also fine tune you configuration on instance level - using
+methods available at `+Stringify+` interface:
+
+[source,java]
+----
+// given
+BeanFactory beanFactory = createBeanFactory();
+Person person = createPerson();
+
+// then
+Stringify stringifier = Stringify.of(person);
+stringifier
+  .beanFactory(beanFactory)
+  .mode(Mode.QUIET)
+  .stringify();
+----
+
+=== Dependencies
+
+* Java >= 8
+* https://github.com/wavesoftware/java-eid-exceptions[EID Exceptions]
+library
+
+==== Contributing
+
+Contributions are welcome!
+
+To contribute, follow the standard
+http://danielkummer.github.io/git-flow-cheatsheet/[git flow] of:
+
+. Fork it
+. Create your feature branch
+(`+git checkout -b feature/my-new-feature+`)
+. Commit your changes (`+git commit -am 'Add some feature'+`)
+. Push to the branch (`+git push origin feature/my-new-feature+`)
+. Create new Pull Request
+
+Even if you can't contribute code, if you have an idea for an
+improvement please open an
+https://github.com/wavesoftware/java-stringify-object/issues[issue].

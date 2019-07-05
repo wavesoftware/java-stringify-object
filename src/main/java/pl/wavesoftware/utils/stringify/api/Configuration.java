@@ -22,19 +22,25 @@ import pl.wavesoftware.utils.stringify.spi.Configurator;
 /**
  * A interface that represents a configuration options for this library
  * <p>
- * To use that one should implement {@link Configurator} with Java's 
- * {@link java.util.ServiceLoader ServiceLoader} mechanism.
- * <p>
- * To do that, create on your classpath, a file:
- * <pre>META-INF/services/pl.wavesoftware.utils.stringify.spi.Configurator</pre>
+ * To configure this library you either use:
+ * <ul>
+ *     <li>declarative way - using Java's {@link java.util.ServiceLoader ServiceLoader}
+ *     mechanism,</li>
+ *     <li>or programmatic way.</li>
+ * </ul>
  *
  * <p>
- * In that file, place a fully qualified class name of your class that implements
- * {@link Configurator} interface. It should be called first time you
- * use an {@link pl.wavesoftware.utils.stringify.Stringify Stringify} to inspect
- * an object.
+ * On how to use declarative way consult Javadoc of {@link Configurator}.
+ * <p>
+ * To use programmatic way, just invoke configuration methods on instance of
+ * {@link pl.wavesoftware.utils.stringify.Stringify Stringify} object.
+ * <p>
+ * {@link BeanFactory} interface can be used to create instances of classes, declared
+ * in annotations used to define inspection rules.
  *
  * @see Configurator
+ * @see BeanFactory
+ * @see pl.wavesoftware.utils.stringify.Stringify Stringify
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
  * @since 2.0.0
  */
