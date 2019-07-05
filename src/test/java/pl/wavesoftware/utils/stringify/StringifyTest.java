@@ -1,67 +1,86 @@
+/*
+ * Copyright 2018-2019 Wave Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package pl.wavesoftware.utils.stringify;
 
 
 import lombok.RequiredArgsConstructor;
-import org.junit.Test;
-import pl.wavesoftware.utils.stringify.configuration.AlwaysTruePredicate;
-import pl.wavesoftware.utils.stringify.configuration.BeanFactory;
-import pl.wavesoftware.utils.stringify.configuration.InspectionPoint;
-import pl.wavesoftware.utils.stringify.configuration.Mode;
-import pl.wavesoftware.utils.stringify.lang.Predicate;
-import pl.wavesoftware.utils.stringify.lang.Supplier;
+import org.junit.jupiter.api.Test;
+import pl.wavesoftware.utils.stringify.api.AlwaysTruePredicate;
+import pl.wavesoftware.utils.stringify.api.InspectionPoint;
+import pl.wavesoftware.utils.stringify.api.Mode;
+import pl.wavesoftware.utils.stringify.spi.BeanFactory;
 
 import java.lang.reflect.Field;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
+import static org.assertj.core.api.Assertions.assertThat;
 
 
 /**
- * @author <a href="krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszyński</a>
+ * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
  * @since 2018-04-18
  */
-public class ObjectStringifierTest {
+class StringifyTest {
 
   private final TestRepository testRepository = new TestRepository();
 
   @Test
-  public void testInQuietMode() {
+  void inQuietMode() {
     // given
     Planet planet = testRepository.createTestPlanet();
-    ObjectStringifier stringifier = new ObjectStringifier(planet);
-    stringifier.setMode(Mode.QUIET);
+    Stringify stringifier = Stringify.of(planet);
+    stringifier.mode(Mode.QUIET);
 
     // when
     String repr = stringifier.toString();
 
     // then
-    assertEquals("<Earth name=\"Earth\", rocky=true, planetSystem=<PlanetSystem" +
+    assertThat(repr).isEqualTo(
+      "<Earth name=\"Earth\", rocky=true, planetSystem=<PlanetSystem" +
       " planets=⁂Lazy>, moon=<Moon name=\"Moon\", rocky=null, planetSystem=(↻), phase=FULL_MOON," +
       " visits={\"1969\": [\"Apollo 11\",\"Apollo 12\"], \"1971\": [\"Apollo 14\",\"Apollo 15\"]," +
-      " \"1972\": [\"Apollo 16\",\"Apollo 17\"]}>, dayOfYear=14, type='A'>", repr);
+      " \"1972\": [\"Apollo 16\",\"Apollo 17\"]}>, dayOfYear=14, type='A'>"
+    );
   }
 
   @Test
-  public void testInPromiscuousMode() {
+  void inPromiscuousMode() {
     // given
     Planet planet = testRepository.createTestPlanet();
-    ObjectStringifier stringifier = new ObjectStringifier(planet);
+    Stringify stringifier = Stringify.of(planet);
 
     // when
     String repr = stringifier.toString();
 
     // then
-    assertEquals("<Earth name=\"Earth\", rocky=true, planetSystem=<PlanetSystem" +
+    assertThat(repr).isEqualTo(
+      "<Earth name=\"Earth\", rocky=true, planetSystem=<PlanetSystem" +
       " planets=⁂Lazy>, moon=<Moon name=\"Moon\", rocky=null, planetSystem=(↻), phase=FULL_MOON," +
       " visits={\"1969\": [\"Apollo 11\",\"Apollo 12\"], \"1971\": [\"Apollo 14\",\"Apollo 15\"]," +
-      " \"1972\": [\"Apollo 16\",\"Apollo 17\"]}>, dayOfYear=14, type='A'>", repr);
+      " \"1972\": [\"Apollo 16\",\"Apollo 17\"]}>, dayOfYear=14, type='A'>"
+    );
   }
 
   @Test
-  public void testByLombok() {
+  void byLombok() {
     // given
     Planet planet = testRepository.createTestPlanet();
 
@@ -69,15 +88,17 @@ public class ObjectStringifierTest {
     String repr = planet.toString();
 
     // then
-    assertEquals("Earth(moon=Moon(phase=FULL_MOON, visits={1969=[Apollo 11, Apollo 12]," +
-      " 1971=[Apollo 14, Apollo 15], 1972=[Apollo 16, Apollo 17]}), dayOfYear=14, type=A)", repr);
+    assertThat(repr).isEqualTo(
+      "Earth(moon=Moon(phase=FULL_MOON, visits={1969=[Apollo 11, Apollo 12]," +
+      " 1971=[Apollo 14, Apollo 15], 1972=[Apollo 16, Apollo 17]}), dayOfYear=14, type=A)"
+    );
   }
 
   @Test
-  public void testWithCustomPredicate() {
+  void withCustomPredicate() {
     // given
     SimpleUser user = testRepository.createTestSimpleUser();
-    ObjectStringifier stringifier = new ObjectStringifier(user);
+    Stringify stringifier = Stringify.of(user);
 
     // when
     ProductionEnvironment.setProduction(true);
@@ -86,11 +107,12 @@ public class ObjectStringifierTest {
     String developmentResult = stringifier.toString();
 
     // then
-    assertEquals("<SimpleUser login=\"llohan\">", productionResult);
-    assertEquals("<SimpleUser login=\"llohan\", password=\"1234567890\", phoneNumber=\"555-123-445\">",
-      developmentResult);
+    assertThat(productionResult).isEqualTo("<SimpleUser login=\"llohan\">");
+    assertThat(developmentResult).isEqualTo(
+      "<SimpleUser login=\"llohan\", password=\"1234567890\", phoneNumber=\"555-123-445\">"
+    );
 
-    assertTrue(new AlwaysTruePredicate().test(
+    assertThat(new AlwaysTruePredicate()).accepts(
       new InspectionPoint() {
         @Override
         public Field getField() {
@@ -107,73 +129,103 @@ public class ObjectStringifierTest {
           return null;
         }
       }
-    ));
+    );
   }
 
   @Test
-  public void testWithCustomPredicateWithPredicateFactory() {
+  void withCustomPredicateWithPredicateFactory() {
     // given
     User user = testRepository.createTestUser();
     IsInDevelopment isDevelopment = new IsInDevelopmentImpl(true);
     IsInDevelopment isProduction = new IsInDevelopmentImpl(false);
     BeanFactory productionBeanFactory = getBeanFactory(isProduction);
     BeanFactory developmentBeanFactory = getBeanFactory(isDevelopment);
-    ObjectStringifier stringifier = new ObjectStringifier(user);
+    Stringify stringifier = Stringify.of(user);
 
     // when
-    stringifier.setBeanFactory(productionBeanFactory);
+    stringifier.beanFactory(productionBeanFactory);
     String productionResult = stringifier.toString();
-    stringifier.setBeanFactory(developmentBeanFactory);
+    stringifier.beanFactory(developmentBeanFactory);
     String developmentResult = stringifier.toString();
-    stringifier.setMode(Mode.QUIET);
-    stringifier.setBeanFactory(developmentBeanFactory);
+    stringifier.mode(Mode.QUIET);
+    stringifier.beanFactory(developmentBeanFactory);
     String developmentQuietResult = stringifier.toString();
 
     // then
-    assertEquals("<User login=\"jdoe\">", productionResult);
-    assertEquals("<User login=\"jdoe\", password=\"1qaz2wsx!@\">", developmentResult);
-    assertEquals("<User password=\"1qaz2wsx!@\">", developmentQuietResult);
+    assertThat(productionResult).isEqualTo("<User login=\"jdoe\">");
+    assertThat(developmentResult).isEqualTo("<User login=\"jdoe\", password=\"1qaz2wsx!@\">");
+    assertThat(developmentQuietResult).isEqualTo("<User password=\"1qaz2wsx!@\">");
   }
 
   @Test
-  public void testOnPerson() {
+  void onPerson() {
     // given
     Person person = testRepository.createPerson();
-    ObjectStringifier stringifier = new ObjectStringifier(person);
+    Stringify stringifier = Stringify.of(person);
     IsInDevelopment isProduction = new IsInDevelopmentImpl(false);
     BeanFactory productionBeanFactory = getBeanFactory(isProduction);
-    stringifier.setBeanFactory(productionBeanFactory);
+    stringifier.beanFactory(productionBeanFactory);
 
     // when
     String productionResult = stringifier.toString();
 
     // then
-    assertEquals("<Person id=15, parent=<Person id=16, parent=null, " +
-      "childs=[(↻)], account=⁂Lazy>, childs=[], account=⁂Lazy>", productionResult);
+    assertThat(productionResult).isEqualTo(
+      "<Person id=15, parent=<Person id=16, parent=null, " +
+      "childs=[(↻)], account=⁂Lazy>, childs=[], account=⁂Lazy>"
+    );
   }
 
   @Test
-  public void testOnPersonWithCustomPerdicateLogic() {
+  void onPersonWithCustomPerdicateLogic() {
     // given
     Person person = testRepository.createPerson();
-    ObjectStringifier stringifier = new ObjectStringifier(person);
-    IsInDevelopment isInDevelopment = new IsInDevelopmentPredicate(new Predicate<Object>() {
-      @Override
-      public boolean test(Object value) {
-        return value instanceof String
-          && ((String) value).contains("!@#$");
-      }
-    });
+    Stringify stringifier = Stringify.of(person);
+    IsInDevelopment isInDevelopment = new IsInDevelopmentPredicate(value ->
+      value instanceof String
+        && ((String) value).contains("!@#$")
+    );
     BeanFactory productionBeanFactory = getBeanFactory(isInDevelopment);
-    stringifier.setBeanFactory(productionBeanFactory);
+    stringifier.beanFactory(productionBeanFactory);
 
     // when
     String productionResult = stringifier.toString();
 
     // then
-    assertEquals("<Person id=15, parent=<Person id=16, parent=null, " +
+    assertThat(productionResult).isEqualTo(
+      "<Person id=15, parent=<Person id=16, parent=null, " +
       "childs=[(↻)], account=⁂Lazy, password=\"!@#$4321qwer\">, childs=[], " +
-      "account=⁂Lazy>", productionResult);
+      "account=⁂Lazy>"
+    );
+    assertThat(stringifier).hasSize(52);
+    assertThat(stringifier.charAt(1)).isEqualTo('P');
+    assertThat(stringifier.subSequence(1, 7)).isEqualTo("Person");
+  }
+
+  @Test
+  void fallbackToDefault() {
+    // given
+    Acme acme1 = new Acme("simple value");
+    Stringify stringifier1 = Stringify.of(acme1);
+    Acme acme2 = new Acme("value with secret");
+    Stringify stringifier2 = Stringify.of(acme2);
+
+    try {
+      // when
+      TestBeanFactory.ready = true;
+      String result1 = stringifier1.toString();
+      String result2 = stringifier2.toString();
+
+      // then
+      assertThat(result1).isEqualTo(
+        "<Acme acme=\"simple value\">"
+      );
+      assertThat(result2).isEqualTo(
+        "<Acme>"
+      );
+    } finally {
+      TestBeanFactory.ready = false;
+    }
   }
 
   private static boolean inspectionPointValue(final InspectionPoint inspectionPoint,
@@ -187,7 +239,7 @@ public class ObjectStringifierTest {
 
   private StaticBeanFactory getBeanFactory(IsInDevelopment isInDevelopmentFalse) {
     return new StaticBeanFactory(
-      new AbstractMap.SimpleImmutableEntry<Class<?>, Predicate<InspectionPoint>>(
+      new AbstractMap.SimpleImmutableEntry<>(
         IsInDevelopment.class, isInDevelopmentFalse
       )
     );
