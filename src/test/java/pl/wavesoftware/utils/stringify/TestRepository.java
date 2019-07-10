@@ -69,7 +69,7 @@ final class TestRepository {
     parent.setIgnored("Ignore it!");
     child.setId(15);
     child.setParent(parent);
-    child.setChilds(new ArrayList<Person>());
+    child.setChilds(new ArrayList<>());
     child.setAccount(a1);
     child.setPassword("rewq1234$#@!");
     child.setIgnored("Dump this");

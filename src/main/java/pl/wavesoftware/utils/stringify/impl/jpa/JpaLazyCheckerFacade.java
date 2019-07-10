@@ -14,37 +14,27 @@
  * limitations under the License.
  */
 
-package pl.wavesoftware.utils.stringify.impl;
+package pl.wavesoftware.utils.stringify.impl.jpa;
 
-import pl.wavesoftware.utils.stringify.impl.inspector.InspectionContext;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+import pl.wavesoftware.utils.stringify.impl.lang.LangModule;
+import pl.wavesoftware.utils.stringify.spi.JpaLazyChecker;
 
-import java.util.IdentityHashMap;
-import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
- * @since 1.0.0
+ * @since 2018-04-18
  */
-final class DefaultInspectionContext implements InspectionContext {
-  private static final Object CONTAIN = new Object();
-
-  private final Map<Object, Object> resolved;
-
-  DefaultInspectionContext() {
-    this(new IdentityHashMap<>());
-  }
-
-  private DefaultInspectionContext(Map<Object, Object> resolved) {
-    this.resolved = resolved;
-  }
+@NoArgsConstructor(access = AccessLevel.PACKAGE)
+final class JpaLazyCheckerFacade implements JpaLazyChecker {
+  private static final JpaLazyChecker NOOP_CHECKER = candidate -> false;
+  private static final Supplier<JpaLazyCheckers> CHECKERS =
+    LangModule.INSTANCE.lazy(new JpaLazyCheckersSupplier(NOOP_CHECKER));
 
   @Override
-  public boolean wasInspected(Object object) {
-    return resolved.containsKey(object);
-  }
-
-  @Override
-  public void markIsInspected(Object object) {
-    resolved.put(object, CONTAIN);
+  public boolean isLazy(Object candidate) {
+    return CHECKERS.get().isLazy(candidate);
   }
 }

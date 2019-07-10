@@ -18,6 +18,9 @@ package pl.wavesoftware.utils.stringify.impl;
 
 import pl.wavesoftware.utils.stringify.api.Configuration;
 import pl.wavesoftware.utils.stringify.api.Mode;
+import pl.wavesoftware.utils.stringify.impl.beans.BeanFactoryCache;
+import pl.wavesoftware.utils.stringify.impl.beans.BeansModule;
+import pl.wavesoftware.utils.stringify.impl.inspector.InspectionContext;
 import pl.wavesoftware.utils.stringify.spi.BeanFactory;
 
 import java.util.function.Function;
@@ -29,7 +32,7 @@ import java.util.function.Function;
 final class ToStringResolverImpl implements ToStringResolver, Configuration {
 
   private final DefaultConfiguration configuration;
-  private final Inspector inspector;
+  private final InspectorBasedToStringResolver delegateResolver;
 
   /**
    * A default constructor
@@ -42,10 +45,8 @@ final class ToStringResolverImpl implements ToStringResolver, Configuration {
       target,
       configuration,
       new DefaultInspectionContext(),
-      new BeanFactoryCache(() ->
-        new FallbackBootFactory(
-          new BootAwareBootFactory(configuration.getBeanFactory(), target)
-        )
+      BeansModule.INSTANCE.cachedBeanFactory(
+        configuration::getBeanFactory, target
       ),
       new InspectingFieldFactory(configuration::getMode)
     );
@@ -59,7 +60,7 @@ final class ToStringResolverImpl implements ToStringResolver, Configuration {
     InspectingFieldFactory inspectingFieldFactory
   ) {
     this.configuration = configuration;
-    this.inspector = new Inspector(
+    this.delegateResolver = new InspectorBasedToStringResolver(
       configuration, target, inspectionContext, new ObjectInspectorImpl(),
       beanFactoryCache, inspectingFieldFactory
     );
@@ -67,18 +68,18 @@ final class ToStringResolverImpl implements ToStringResolver, Configuration {
 
   @Override
   public CharSequence resolve() {
-    return inspector.resolve();
+    return delegateResolver.resolve();
   }
 
   @Override
   public Configuration mode(Mode mode) {
-    inspector.clear();
+    delegateResolver.clear();
     return configuration.mode(mode);
   }
 
   @Override
   public Configuration beanFactory(BeanFactory beanFactory) {
-    inspector.clear();
+    delegateResolver.clear();
     return configuration.beanFactory(beanFactory);
   }
 
@@ -86,7 +87,7 @@ final class ToStringResolverImpl implements ToStringResolver, Configuration {
 
     @Override
     public CharSequence apply(Object object) {
-      return inspector.inspectObject(object);
+      return delegateResolver.inspectObject(object);
     }
 
   }
