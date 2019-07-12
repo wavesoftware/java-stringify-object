@@ -18,6 +18,7 @@ package pl.wavesoftware.utils.stringify.impl;
 
 import pl.wavesoftware.utils.stringify.api.Configuration;
 import pl.wavesoftware.utils.stringify.api.Mode;
+import pl.wavesoftware.utils.stringify.impl.beans.BeansModule;
 import pl.wavesoftware.utils.stringify.spi.BeanFactory;
 
 /**
@@ -25,8 +26,8 @@ import pl.wavesoftware.utils.stringify.spi.BeanFactory;
  * @since 2.0.0
  */
 final class DefaultConfiguration implements Configuration {
-  static final DefaultBeanFactory DEFAULT_BEAN_FACTORY =
-    new DefaultBeanFactory();
+  private static final BeanFactory DEFAULT_BEAN_FACTORY =
+    BeansModule.INSTANCE.defaultBeanFactory();
 
   private Mode mode = Mode.DEFAULT_MODE;
   private BeanFactory beanFactory = DEFAULT_BEAN_FACTORY;

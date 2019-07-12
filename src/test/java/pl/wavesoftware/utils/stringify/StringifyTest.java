@@ -189,10 +189,10 @@ class StringifyTest {
     stringifier.beanFactory(productionBeanFactory);
 
     // when
-    String productionResult = stringifier.toString();
+    CharSequence productionResult = stringifier.stringify();
 
     // then
-    assertThat(productionResult).isEqualTo(
+    assertThat(productionResult).isEqualToIgnoringWhitespace(
       "<Person id=15, parent=<Person id=16, parent=null, " +
       "childs=[(↻)], account=⁂Lazy, password=\"!@#$4321qwer\">, childs=[], " +
       "account=⁂Lazy>"
@@ -237,10 +237,10 @@ class StringifyTest {
     );
   }
 
-  private StaticBeanFactory getBeanFactory(IsInDevelopment isInDevelopmentFalse) {
+  private StaticBeanFactory getBeanFactory(IsInDevelopment isInDevelopment) {
     return new StaticBeanFactory(
       new AbstractMap.SimpleImmutableEntry<>(
-        IsInDevelopment.class, isInDevelopmentFalse
+        IsInDevelopment.class, isInDevelopment
       )
     );
   }

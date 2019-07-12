@@ -14,37 +14,30 @@
  * limitations under the License.
  */
 
-package pl.wavesoftware.utils.stringify.impl;
+package pl.wavesoftware.utils.stringify.impl.reflect;
 
-import pl.wavesoftware.utils.stringify.impl.inspector.InspectionContext;
+import lombok.AccessLevel;
+import lombok.RequiredArgsConstructor;
 
-import java.util.IdentityHashMap;
-import java.util.Map;
+import javax.annotation.Nullable;
+import java.util.Optional;
 
 /**
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
- * @since 1.0.0
+ * @since 2.0.0
  */
-final class DefaultInspectionContext implements InspectionContext {
-  private static final Object CONTAIN = new Object();
+@RequiredArgsConstructor(access = AccessLevel.PACKAGE)
+final class ClassInfoImpl<T> implements ClassInfo<T> {
 
-  private final Map<Object, Object> resolved;
+  @Nullable
+  private final Class<T> cls;
 
-  DefaultInspectionContext() {
-    this(new IdentityHashMap<>());
-  }
-
-  private DefaultInspectionContext(Map<Object, Object> resolved) {
-    this.resolved = resolved;
+  static <T> ClassInfo<T> empty() {
+    return new ClassInfoImpl<>(null);
   }
 
   @Override
-  public boolean wasInspected(Object object) {
-    return resolved.containsKey(object);
-  }
-
-  @Override
-  public void markIsInspected(Object object) {
-    resolved.put(object, CONTAIN);
+  public Optional<Class<T>> maybeClass() {
+    return Optional.ofNullable(cls);
   }
 }

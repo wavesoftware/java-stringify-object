@@ -10,7 +10,6 @@ matrix:
       env: JACOCO=true
     - jdk: openjdk8
       env: JACOCO=true SONAR=publish
-      script: ./mvnw -V clean verify sonar:sonar --fail-at-end -U
 notifications:
   email:
     on_failure: change
