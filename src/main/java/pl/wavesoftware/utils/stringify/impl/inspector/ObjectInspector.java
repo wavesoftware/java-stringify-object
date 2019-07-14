@@ -16,16 +16,30 @@
 
 package pl.wavesoftware.utils.stringify.impl.inspector;
 
-import java.util.function.Function;
-
 /**
+ * Represents a basic object inspector that can handle specific type of object, which
+ * is determined by call to {@link #consentTo(Object, InspectionContext)}
+ * method.
+ *
  * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
  * @since 1.0.0
  */
 public interface ObjectInspector {
-  boolean consentTo(Object candidate, InspectionContext inspectionContext);
+  /**
+   * Determines if this inspector is suitable for a given object
+   *
+   * @param candidate a candidate to inspect
+   * @param context   a context of inspection
+   * @return true, if this object inspector can inspect candidate object
+   */
+  boolean consentTo(Object candidate, InspectionContext context);
 
-  CharSequence inspect(
-    Object object, Function<Object, CharSequence> alternative
-  );
+  /**
+   * Will inspect a given object to character sequence
+   *
+   * @param object  a object to inspect
+   * @param context a context of inspection
+   * @return a character sequence representation of given object
+   */
+  CharSequence inspect(Object object, InspectionContext context);
 }

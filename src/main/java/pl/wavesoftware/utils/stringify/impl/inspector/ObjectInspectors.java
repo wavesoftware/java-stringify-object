@@ -16,24 +16,11 @@
 
 package pl.wavesoftware.utils.stringify.impl.inspector;
 
-import pl.wavesoftware.utils.stringify.impl.jpa.JpaModule;
-
 /**
- * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
- * @since 1.0.0
+ * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
+ * @since 2.0.0
  */
-final class JpaLazyInspector implements ObjectInspector {
-  @Override
-  public boolean consentTo(Object candidate, InspectionContext context) {
-    return JpaModule.INSTANCE
-      .lazyChecker()
-      .isLazy(candidate);
-  }
+public interface ObjectInspectors {
+  Iterable<ObjectInspector> inspectors();
 
-  @Override
-  public CharSequence inspect(Object object, InspectionContext context) {
-    return context.theme()
-      .jpaLazy()
-      .representation(object::hashCode);
-  }
 }

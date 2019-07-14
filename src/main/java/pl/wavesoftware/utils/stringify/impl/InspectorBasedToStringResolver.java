@@ -21,11 +21,11 @@ import pl.wavesoftware.utils.stringify.impl.beans.BeanFactoryCache;
 import pl.wavesoftware.utils.stringify.impl.inspector.InspectionContext;
 import pl.wavesoftware.utils.stringify.impl.inspector.InspectorModule;
 import pl.wavesoftware.utils.stringify.impl.inspector.ObjectInspector;
+import pl.wavesoftware.utils.stringify.spi.theme.ComplexObjectStyle;
 
 import java.lang.reflect.Field;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.function.Function;
 
 import static pl.wavesoftware.eid.utils.EidExecutions.tryToExecute;
 
@@ -40,7 +40,6 @@ final class InspectorBasedToStringResolver implements ToStringResolver {
   private final DefaultConfiguration configuration;
   private final Object target;
   private final InspectionContext inspectionContext;
-  private final Function<Object, CharSequence> alternative;
   private final BeanFactoryCache beanFactoryCache;
   private final InspectingFieldFactory inspectingFieldFactory;
 
@@ -48,48 +47,49 @@ final class InspectorBasedToStringResolver implements ToStringResolver {
     DefaultConfiguration configuration,
     Object target,
     InspectionContext inspectionContext,
-    Function<Object, CharSequence> alternative,
     BeanFactoryCache beanFactoryCache,
     InspectingFieldFactory inspectingFieldFactory
   ) {
     this.configuration = configuration;
     this.target = target;
     this.inspectionContext = inspectionContext;
-    this.alternative = alternative;
     this.beanFactoryCache = beanFactoryCache;
     this.inspectingFieldFactory = inspectingFieldFactory;
   }
 
   @Override
   public CharSequence resolve() {
-    inspectionContext.markIsInspected(target);
+    inspectionContext.markAsInspected(target);
+    ComplexObjectStyle style = inspectionContext.theme().complexObject();
     StringBuilder sb = new StringBuilder();
-    sb.append('<');
-    sb.append(target.getClass().getSimpleName());
+    sb.append(style.begin());
+    sb.append(style.name(target::getClass, target::hashCode));
     CharSequence props = propertiesForToString();
     if (props.length() != 0) {
-      sb.append(' ');
+      sb.append(style.nameSeparator());
       sb.append(props);
     }
-    sb.append('>');
+    sb.append(style.end());
     return sb;
   }
 
   private CharSequence propertiesForToString() {
     Map<String, CharSequence> props;
     props = inspectTargetAsClass(target.getClass());
+    ComplexObjectStyle style = inspectionContext.theme().complexObject();
     StringBuilder sb = new StringBuilder();
     for (Map.Entry<String, CharSequence> entry : props.entrySet()) {
       String fieldName = entry.getKey();
       CharSequence fieldStringValue = entry.getValue();
       sb.append(fieldName);
-      sb.append("=");
+      sb.append(style.propertyEquals());
       sb.append(fieldStringValue);
-      sb.append(", ");
+      sb.append(style.propertySeparator());
     }
-    if (sb.length() > 0) {
-      sb.deleteCharAt(sb.length() - 1);
-      sb.deleteCharAt(sb.length() - 1);
+    if (!props.isEmpty()) {
+      for (int i = 0; i < style.propertySeparator().length(); i++) {
+        sb.deleteCharAt(sb.length() - 1);
+      }
     }
     return sb;
   }
@@ -106,11 +106,13 @@ final class InspectorBasedToStringResolver implements ToStringResolver {
     return props;
   }
 
-  private void inspectFields(Field[] fields,
-                             Map<String, CharSequence> properties) {
+  private void inspectFields(
+    Field[] fields, Map<String, CharSequence> properties
+  ) {
     for (Field field : fields) {
       InspectionPoint inspectionPoint = createInspectionPoint(field);
-      InspectingField inspectingField = inspectingFieldFactory.create(inspectionPoint, beanFactoryCache);
+      InspectingField inspectingField = inspectingFieldFactory
+        .create(inspectionPoint, beanFactoryCache);
       if (inspectingField.shouldInspect()) {
         inspectAnnotatedField(properties, field, inspectingField);
       }
@@ -121,9 +123,11 @@ final class InspectorBasedToStringResolver implements ToStringResolver {
     return new InspectionPointImpl(field, target);
   }
 
-  private void inspectAnnotatedField(final Map<String, CharSequence> properties,
-                                     final Field field,
-                                     final InspectingField inspectingField) {
+  private void inspectAnnotatedField(
+    final Map<String, CharSequence> properties,
+    final Field field,
+    final InspectingField inspectingField
+  ) {
     tryToExecute(() -> {
       ensureAccessible(field);
       Object value = field.get(target);
@@ -146,7 +150,7 @@ final class InspectorBasedToStringResolver implements ToStringResolver {
   CharSequence inspectObject(Object object) {
     for (ObjectInspector inspector : OBJECT_INSPECTORS) {
       if (inspector.consentTo(object, inspectionContext)) {
-        return inspector.inspect(object, alternative);
+        return inspector.inspect(object, inspectionContext);
       }
     }
     ToStringResolverImpl sub = new ToStringResolverImpl(

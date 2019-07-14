@@ -19,7 +19,9 @@ package pl.wavesoftware.utils.stringify.impl;
 import pl.wavesoftware.utils.stringify.api.Configuration;
 import pl.wavesoftware.utils.stringify.api.Mode;
 import pl.wavesoftware.utils.stringify.impl.beans.BeansModule;
+import pl.wavesoftware.utils.stringify.impl.theme.ThemeModule;
 import pl.wavesoftware.utils.stringify.spi.BeanFactory;
+import pl.wavesoftware.utils.stringify.spi.theme.Theme;
 
 /**
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
@@ -31,6 +33,7 @@ final class DefaultConfiguration implements Configuration {
 
   private Mode mode = Mode.DEFAULT_MODE;
   private BeanFactory beanFactory = DEFAULT_BEAN_FACTORY;
+  private Theme theme = ThemeModule.INSTANCE.defaultTheme();
 
   @Override
   public Configuration mode(Mode mode) {
@@ -41,6 +44,12 @@ final class DefaultConfiguration implements Configuration {
   @Override
   public Configuration beanFactory(BeanFactory beanFactory) {
     this.beanFactory = beanFactory;
+    return this;
+  }
+
+  @Override
+  public Configuration theme(Theme theme) {
+    this.theme = theme;
     return this;
   }
 
@@ -57,5 +66,9 @@ final class DefaultConfiguration implements Configuration {
 
   BeanFactory getBeanFactory() {
     return beanFactory;
+  }
+
+  Theme getTheme() {
+    return theme;
   }
 }

@@ -18,7 +18,6 @@ package pl.wavesoftware.utils.stringify.impl.inspector;
 
 import java.time.temporal.Temporal;
 import java.util.Date;
-import java.util.function.Function;
 
 /**
  * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
@@ -27,14 +26,12 @@ import java.util.function.Function;
 final class PrimitiveInspector implements ObjectInspector {
 
   @Override
-  public boolean consentTo(Object candidate,
-                           InspectionContext inspectionContext) {
+  public boolean consentTo(Object candidate, InspectionContext context) {
     return isPrimitive(candidate);
   }
 
   @Override
-  public CharSequence inspect(Object object,
-                              Function<Object, CharSequence> alternative) {
+  public CharSequence inspect(Object object, InspectionContext context) {
     return object.toString();
   }
 

@@ -17,9 +17,11 @@
 package pl.wavesoftware.utils.stringify.impl;
 
 import pl.wavesoftware.utils.stringify.Stringify;
+import pl.wavesoftware.utils.stringify.api.Configuration;
 import pl.wavesoftware.utils.stringify.api.Inspect;
 import pl.wavesoftware.utils.stringify.api.Mode;
 import pl.wavesoftware.utils.stringify.spi.BeanFactory;
+import pl.wavesoftware.utils.stringify.spi.theme.Theme;
 
 /**
  * A default implementation of {@link Stringify}.
@@ -82,6 +84,12 @@ public final class DefaultStringify implements Stringify {
   @Override
   public Stringify beanFactory(BeanFactory beanFactory) {
     resolver.beanFactory(beanFactory);
+    return this;
+  }
+
+  @Override
+  public Configuration theme(Theme theme) {
+    resolver.theme(theme);
     return this;
   }
 }

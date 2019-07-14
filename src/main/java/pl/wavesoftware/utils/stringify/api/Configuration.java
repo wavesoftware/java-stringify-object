@@ -18,6 +18,7 @@ package pl.wavesoftware.utils.stringify.api;
 
 import pl.wavesoftware.utils.stringify.spi.BeanFactory;
 import pl.wavesoftware.utils.stringify.spi.Configurator;
+import pl.wavesoftware.utils.stringify.spi.theme.Theme;
 
 /**
  * A interface that represents a configuration options for this library
@@ -60,4 +61,12 @@ public interface Configuration {
    * @return a self reference
    */
   Configuration beanFactory(BeanFactory beanFactory);
+
+  /**
+   * Configures a user provided theme
+   *
+   * @param theme a theme provided by user
+   * @return a self reference
+   */
+  Configuration theme(Theme theme);
 }

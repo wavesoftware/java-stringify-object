@@ -16,8 +16,9 @@
 
 package pl.wavesoftware.utils.stringify.impl.inspector;
 
+import pl.wavesoftware.utils.stringify.spi.theme.MapStyle;
+
 import java.util.Map;
-import java.util.function.Function;
 
 /**
  * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
@@ -26,30 +27,30 @@ import java.util.function.Function;
 final class MapInspector implements ObjectInspector {
 
   @Override
-  public boolean consentTo(Object candidate,
-                           InspectionContext inspectionContext) {
+  public boolean consentTo(Object candidate, InspectionContext context) {
     return candidate instanceof Map;
   }
 
   @Override
-  public CharSequence inspect(Object object,
-                              Function<Object, CharSequence> alternative) {
+  public CharSequence inspect(Object object, InspectionContext context) {
     Map<?, ?> map = (Map<?, ?>) object;
+    MapStyle style = context.theme().map();
     StringBuilder sb = new StringBuilder();
-    sb.append("{");
+    sb.append(style.begin());
     for (Map.Entry<?, ?> entry : map.entrySet()) {
       Object key = entry.getKey();
       Object value = entry.getValue();
-      sb.append(alternative.apply(key));
-      sb.append(": ");
-      sb.append(alternative.apply(value));
-      sb.append(", ");
+      sb.append(context.rootInspector().apply(key));
+      sb.append(style.entryEquals());
+      sb.append(context.rootInspector().apply(value));
+      sb.append(style.separator());
     }
-    if (sb.length() > 1) {
-      sb.deleteCharAt(sb.length() - 1);
-      sb.deleteCharAt(sb.length() - 1);
+    if (!map.isEmpty()) {
+      for (int i=0; i < style.separator().length(); i++) {
+        sb.deleteCharAt(sb.length() - 1);
+      }
     }
-    sb.append("}");
+    sb.append(style.end());
     return sb.toString();
   }
 }

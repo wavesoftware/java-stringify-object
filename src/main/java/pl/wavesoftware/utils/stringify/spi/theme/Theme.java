@@ -14,22 +14,20 @@
  * limitations under the License.
  */
 
-package pl.wavesoftware.utils.stringify.impl.inspector;
+package pl.wavesoftware.utils.stringify.spi.theme;
 
 /**
- * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
- * @since 1.0.0
+ * Theme represents a set of styles for object inspectors.
+ *
+ * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
+ * @since 2.0.0
  */
-final class RecursionInspector implements ObjectInspector {
-  @Override
-  public boolean consentTo(Object candidate, InspectionContext context) {
-    return context.wasInspected(candidate);
-  }
-
-  @Override
-  public CharSequence inspect(Object object, InspectionContext context) {
-    return context.theme()
-      .recursion()
-      .representation(object::getClass, object::hashCode);
-  }
+public interface Theme {
+  ComplexObjectStyle complexObject();
+  MapStyle map();
+  CharacterStyle character();
+  CharSequenceStyle charSequence();
+  IterableStyle iterable();
+  JpaLazyStyle jpaLazy();
+  RecursionStyle recursion();
 }

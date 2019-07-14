@@ -14,22 +14,14 @@
  * limitations under the License.
  */
 
-package pl.wavesoftware.utils.stringify.impl.inspector;
-
 /**
- * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
- * @since 1.0.0
+ * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
+ * @since 2018-04-18
  */
-final class RecursionInspector implements ObjectInspector {
-  @Override
-  public boolean consentTo(Object candidate, InspectionContext context) {
-    return context.wasInspected(candidate);
-  }
+@ReturnTypesAreNonnullByDefault
+@ParametersAreNonnullByDefault
+package pl.wavesoftware.utils.stringify.impl.theme;
 
-  @Override
-  public CharSequence inspect(Object object, InspectionContext context) {
-    return context.theme()
-      .recursion()
-      .representation(object::getClass, object::hashCode);
-  }
-}
+import pl.wavesoftware.eid.api.ReturnTypesAreNonnullByDefault;
+
+import javax.annotation.ParametersAreNonnullByDefault;

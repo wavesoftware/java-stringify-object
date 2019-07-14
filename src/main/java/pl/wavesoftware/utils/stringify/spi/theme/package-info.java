@@ -14,26 +14,14 @@
  * limitations under the License.
  */
 
-package pl.wavesoftware.utils.stringify.impl.inspector;
-
-import pl.wavesoftware.utils.stringify.impl.jpa.JpaModule;
-
 /**
  * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
- * @since 1.0.0
+ * @since 20.04.18
  */
-final class JpaLazyInspector implements ObjectInspector {
-  @Override
-  public boolean consentTo(Object candidate, InspectionContext context) {
-    return JpaModule.INSTANCE
-      .lazyChecker()
-      .isLazy(candidate);
-  }
+@ReturnTypesAreNonnullByDefault
+@ParametersAreNonnullByDefault
+package pl.wavesoftware.utils.stringify.spi.theme;
 
-  @Override
-  public CharSequence inspect(Object object, InspectionContext context) {
-    return context.theme()
-      .jpaLazy()
-      .representation(object::hashCode);
-  }
-}
+import pl.wavesoftware.eid.api.ReturnTypesAreNonnullByDefault;
+
+import javax.annotation.ParametersAreNonnullByDefault;

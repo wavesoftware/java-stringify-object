@@ -22,8 +22,7 @@ import pl.wavesoftware.utils.stringify.impl.beans.BeanFactoryCache;
 import pl.wavesoftware.utils.stringify.impl.beans.BeansModule;
 import pl.wavesoftware.utils.stringify.impl.inspector.InspectionContext;
 import pl.wavesoftware.utils.stringify.spi.BeanFactory;
-
-import java.util.function.Function;
+import pl.wavesoftware.utils.stringify.spi.theme.Theme;
 
 /**
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
@@ -44,7 +43,7 @@ final class ToStringResolverImpl implements ToStringResolver, Configuration {
     this(
       target,
       configuration,
-      new DefaultInspectionContext(),
+      new DefaultInspectionContext(configuration.getTheme()),
       BeansModule.INSTANCE.cachedBeanFactory(
         configuration::getBeanFactory, target
       ),
@@ -61,9 +60,23 @@ final class ToStringResolverImpl implements ToStringResolver, Configuration {
   ) {
     this.configuration = configuration;
     this.delegateResolver = new InspectorBasedToStringResolver(
-      configuration, target, inspectionContext, new ObjectInspectorImpl(),
+      configuration, target, inspectionContext,
       beanFactoryCache, inspectingFieldFactory
     );
+  }
+
+  private ToStringResolverImpl(
+    Object target,
+    DefaultConfiguration configuration,
+    DefaultInspectionContext inspectionContext,
+    BeanFactoryCache beanFactoryCache,
+    InspectingFieldFactory inspectingFieldFactory
+  ) {
+    this(
+      target, configuration, (InspectionContext) inspectionContext,
+      beanFactoryCache, inspectingFieldFactory
+    );
+    inspectionContext.rootInpector(delegateResolver::inspectObject);
   }
 
   @Override
@@ -83,13 +96,9 @@ final class ToStringResolverImpl implements ToStringResolver, Configuration {
     return configuration.beanFactory(beanFactory);
   }
 
-  private final class ObjectInspectorImpl implements Function<Object, CharSequence> {
-
-    @Override
-    public CharSequence apply(Object object) {
-      return delegateResolver.inspectObject(object);
-    }
-
+  @Override
+  public Configuration theme(Theme theme) {
+    delegateResolver.clear();
+    return configuration.theme(theme);
   }
-
 }

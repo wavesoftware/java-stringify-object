@@ -16,11 +16,42 @@
 
 package pl.wavesoftware.utils.stringify.impl.inspector;
 
+import pl.wavesoftware.utils.stringify.spi.theme.Theme;
+
 /**
+ * Represents a context while complex object is being inspected. This object is created
+ * while staring inspection and lives until inspection is over.
+ *
  * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
  * @since 1.0.0
  */
 public interface InspectionContext {
+  /**
+   * Determine if given object was already inspected.
+   *
+   * @param object a object to test
+   * @return true, if object was already inspected, false otherwise.
+   */
   boolean wasInspected(Object object);
-  void markIsInspected(Object object);
+
+  /**
+   * Marks an object as inspected. This is to prevent recursion.
+   *
+   * @param object an object to be marked
+   */
+  void markAsInspected(Object object);
+
+  /**
+   * Retrieves a root inspector.
+   *
+   * @return a root inspector.
+   */
+  RootInpector rootInspector();
+
+  /**
+   * Retrieves a currently configured theme to be used by inspectors
+   *
+   * @return a theme
+   */
+  Theme theme();
 }

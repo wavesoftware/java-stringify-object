@@ -14,26 +14,27 @@
  * limitations under the License.
  */
 
-package pl.wavesoftware.utils.stringify.impl.inspector;
+package pl.wavesoftware.utils.stringify.impl.theme;
 
-import pl.wavesoftware.utils.stringify.impl.jpa.JpaModule;
+import pl.wavesoftware.utils.stringify.spi.theme.IterableStyle;
 
 /**
- * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
- * @since 1.0.0
+ * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
+ * @since 2.0.0
  */
-final class JpaLazyInspector implements ObjectInspector {
+final class DefaultIterableStyle implements IterableStyle {
   @Override
-  public boolean consentTo(Object candidate, InspectionContext context) {
-    return JpaModule.INSTANCE
-      .lazyChecker()
-      .isLazy(candidate);
+  public CharSequence begin() {
+    return "[";
   }
 
   @Override
-  public CharSequence inspect(Object object, InspectionContext context) {
-    return context.theme()
-      .jpaLazy()
-      .representation(object::hashCode);
+  public CharSequence separator() {
+    return ",";
+  }
+
+  @Override
+  public CharSequence end() {
+    return "]";
   }
 }
