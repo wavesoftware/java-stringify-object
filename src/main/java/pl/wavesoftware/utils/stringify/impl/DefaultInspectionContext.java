@@ -22,6 +22,7 @@ import pl.wavesoftware.utils.stringify.spi.theme.Theme;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
@@ -31,11 +32,11 @@ final class DefaultInspectionContext implements InspectionContext {
   private static final Object CONTAIN = new Object();
 
   private final Map<Object, Object> resolved = new IdentityHashMap<>();
-  private final Theme theme;
+  private final Supplier<Theme> theme;
 
   private RootInpector rootInpector;
 
-  DefaultInspectionContext(Theme theme) {
+  DefaultInspectionContext(Supplier<Theme> theme) {
     this.theme = theme;
   }
 
@@ -56,7 +57,7 @@ final class DefaultInspectionContext implements InspectionContext {
 
   @Override
   public Theme theme() {
-    return theme;
+    return theme.get();
   }
 
   public void rootInpector(RootInpector rootInpector) {

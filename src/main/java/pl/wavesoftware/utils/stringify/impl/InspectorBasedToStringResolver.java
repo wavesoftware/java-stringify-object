@@ -63,7 +63,7 @@ final class InspectorBasedToStringResolver implements ToStringResolver {
     ComplexObjectStyle style = inspectionContext.theme().complexObject();
     StringBuilder sb = new StringBuilder();
     sb.append(style.begin());
-    sb.append(style.name(target::getClass, target::hashCode));
+    sb.append(style.name(target));
     CharSequence props = propertiesForToString();
     if (props.length() != 0) {
       sb.append(style.nameSeparator());
@@ -78,16 +78,17 @@ final class InspectorBasedToStringResolver implements ToStringResolver {
     props = inspectTargetAsClass(target.getClass());
     ComplexObjectStyle style = inspectionContext.theme().complexObject();
     StringBuilder sb = new StringBuilder();
+    CharSequence propertySeparator = style.propertySeparator();
     for (Map.Entry<String, CharSequence> entry : props.entrySet()) {
       String fieldName = entry.getKey();
       CharSequence fieldStringValue = entry.getValue();
       sb.append(fieldName);
       sb.append(style.propertyEquals());
       sb.append(fieldStringValue);
-      sb.append(style.propertySeparator());
+      sb.append(propertySeparator);
     }
     if (!props.isEmpty()) {
-      for (int i = 0; i < style.propertySeparator().length(); i++) {
+      for (int i = 0; i < propertySeparator.length(); i++) {
         sb.deleteCharAt(sb.length() - 1);
       }
     }

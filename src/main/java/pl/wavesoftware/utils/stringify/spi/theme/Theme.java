@@ -23,11 +23,31 @@ package pl.wavesoftware.utils.stringify.spi.theme;
  * @since 2.0.0
  */
 public interface Theme {
-  ComplexObjectStyle complexObject();
-  MapStyle map();
-  CharacterStyle character();
-  CharSequenceStyle charSequence();
-  IterableStyle iterable();
-  JpaLazyStyle jpaLazy();
-  RecursionStyle recursion();
+  default ComplexObjectStyle complexObject() {
+    return new ComplexObjectStyle() {};
+  }
+
+  default MapStyle map() {
+    return new MapStyle() {};
+  }
+
+  default CharacterStyle character() {
+    return new CharacterStyle() {};
+  }
+
+  default CharSequenceStyle charSequence() {
+    return new CharSequenceStyle() {};
+  }
+
+  default IterableStyle iterable() {
+    return new IterableStyle() {};
+  }
+
+  default JpaLazyStyle jpaLazy() {
+    return new JpaLazyStyle() {};
+  }
+
+  default RecursionStyle recursion() {
+    return new RecursionStyle() {};
+  }
 }

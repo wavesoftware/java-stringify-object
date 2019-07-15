@@ -16,18 +16,32 @@
 
 package pl.wavesoftware.utils.stringify.spi.theme;
 
-import java.util.function.Supplier;
-
 /**
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
  * @since 2.0.0
  */
 public interface ComplexObjectStyle {
-  CharSequence begin();
-  CharSequence name(Supplier<Class<?>> type, Supplier<Integer> hashCode);
-  CharSequence end();
-  CharSequence nameSeparator();
+  default CharSequence begin() {
+    return "<";
+  }
 
-  CharSequence propertyEquals();
-  CharSequence propertySeparator();
+  default CharSequence name(Object target) {
+    return target.getClass().getSimpleName();
+  }
+
+  default CharSequence end() {
+    return ">";
+  }
+
+  default CharSequence nameSeparator() {
+    return " ";
+  }
+
+  default CharSequence propertyEquals() {
+    return "=";
+  }
+
+  default CharSequence propertySeparator() {
+    return ", ";
+  }
 }

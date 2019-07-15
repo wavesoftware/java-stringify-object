@@ -21,8 +21,19 @@ package pl.wavesoftware.utils.stringify.spi.theme;
  * @since 0.1.0
  */
 public interface MapStyle {
-  CharSequence begin();
-  CharSequence separator();
-  CharSequence entryEquals();
-  CharSequence end();
+  default CharSequence begin() {
+    return "{";
+  }
+
+  default CharSequence separator() {
+    return ", ";
+  }
+
+  default CharSequence entryEquals() {
+    return ": ";
+  }
+
+  default CharSequence end() {
+    return "}";
+  }
 }

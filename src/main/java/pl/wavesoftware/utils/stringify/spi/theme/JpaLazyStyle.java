@@ -16,12 +16,12 @@
 
 package pl.wavesoftware.utils.stringify.spi.theme;
 
-import java.util.function.Supplier;
-
 /**
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
  * @since 2.0.0
  */
 public interface JpaLazyStyle {
-  CharSequence representation(Supplier<Integer> hashCode);
+  default CharSequence representation(Object target) {
+    return "⁂Lazy";
+  }
 }

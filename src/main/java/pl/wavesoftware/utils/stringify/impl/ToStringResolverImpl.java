@@ -43,7 +43,7 @@ final class ToStringResolverImpl implements ToStringResolver, Configuration {
     this(
       target,
       configuration,
-      new DefaultInspectionContext(configuration.getTheme()),
+      new DefaultInspectionContext(configuration::getTheme),
       BeansModule.INSTANCE.cachedBeanFactory(
         configuration::getBeanFactory, target
       ),

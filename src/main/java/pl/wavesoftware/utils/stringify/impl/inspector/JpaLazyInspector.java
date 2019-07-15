@@ -34,6 +34,6 @@ final class JpaLazyInspector implements ObjectInspector {
   public CharSequence inspect(Object object, InspectionContext context) {
     return context.theme()
       .jpaLazy()
-      .representation(object::hashCode);
+      .representation(object);
   }
 }

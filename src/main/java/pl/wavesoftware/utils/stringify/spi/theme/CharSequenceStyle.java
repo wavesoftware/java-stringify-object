@@ -21,5 +21,7 @@ package pl.wavesoftware.utils.stringify.spi.theme;
  * @since 2.0.0
  */
 public interface CharSequenceStyle {
-  CharSequence quote();
+  default CharSequence quote() {
+    return "\"";
+  }
 }

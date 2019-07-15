@@ -30,6 +30,6 @@ final class RecursionInspector implements ObjectInspector {
   public CharSequence inspect(Object object, InspectionContext context) {
     return context.theme()
       .recursion()
-      .representation(object::getClass, object::hashCode);
+      .representation(object);
   }
 }

@@ -21,7 +21,15 @@ package pl.wavesoftware.utils.stringify.spi.theme;
  * @since 2.0.0
  */
 public interface IterableStyle {
-  CharSequence begin();
-  CharSequence separator();
-  CharSequence end();
+  default CharSequence begin() {
+    return "[";
+  }
+
+  default CharSequence separator() {
+    return ",";
+  }
+
+  default CharSequence end() {
+    return "]";
+  }
 }
