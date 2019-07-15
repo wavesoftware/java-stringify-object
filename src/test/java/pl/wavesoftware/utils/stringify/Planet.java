@@ -28,7 +28,7 @@ import java.io.Serializable;
  * @since 2018-04-18
  */
 @Data
-abstract class Planet implements Serializable {
+public abstract class Planet implements Serializable {
 
   private static final long serialVersionUID = 20180430201529L;
 

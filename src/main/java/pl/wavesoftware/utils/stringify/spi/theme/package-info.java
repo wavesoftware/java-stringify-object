@@ -14,31 +14,14 @@
  * limitations under the License.
  */
 
-package pl.wavesoftware.utils.stringify;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import pl.wavesoftware.utils.stringify.api.Inspect;
-
 /**
- * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
- * @since 2018-04-18
+ * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
+ * @since 20.04.18
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
-public final class Earth extends Planet {
+@ReturnTypesAreNonnullByDefault
+@ParametersAreNonnullByDefault
+package pl.wavesoftware.utils.stringify.spi.theme;
 
-  private static final long serialVersionUID = 20180430201544L;
+import pl.wavesoftware.eid.api.ReturnTypesAreNonnullByDefault;
 
-  @Inspect
-  private Moon moon;
-  @Inspect
-  private int dayOfYear;
-  @Inspect
-  private char type;
-
-
-  Earth() {
-    super(true, "Earth");
-  }
-}
+import javax.annotation.ParametersAreNonnullByDefault;

@@ -29,9 +29,9 @@ import java.util.Collections;
  * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
  * @since 20.04.18
  */
-final class TestRepository {
+public final class TestRepository {
   @SuppressWarnings("unchecked")
-  Planet createTestPlanet() {
+  public Planet createTestPlanet() {
     PlanetSystem earthPlanetSystem = new PlanetSystem();
     Moon moon = new Moon(Phase.FULL_MOON);
     moon.setPlanetSystem(earthPlanetSystem);

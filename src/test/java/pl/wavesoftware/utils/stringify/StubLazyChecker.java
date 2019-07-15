@@ -16,29 +16,22 @@
 
 package pl.wavesoftware.utils.stringify;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import pl.wavesoftware.utils.stringify.api.Inspect;
+import pl.wavesoftware.utils.stringify.spi.JpaLazyChecker;
 
 /**
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
- * @since 2018-04-18
+ * @since 2.0.0
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
-public final class Earth extends Planet {
+public final class StubLazyChecker implements JpaLazyChecker {
 
-  private static final long serialVersionUID = 20180430201544L;
+  @Override
+  public boolean isLazy(Object candidate) {
+    return true;
+  }
 
-  @Inspect
-  private Moon moon;
-  @Inspect
-  private int dayOfYear;
-  @Inspect
-  private char type;
-
-
-  Earth() {
-    super(true, "Earth");
+  @Override
+  public boolean isSuitable(Object candidate) {
+    return JpaLazyChecker.super.isSuitable(candidate) &&
+      candidate instanceof StubLazy;
   }
 }

@@ -14,31 +14,40 @@
  * limitations under the License.
  */
 
-package pl.wavesoftware.utils.stringify;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import pl.wavesoftware.utils.stringify.api.Inspect;
+package pl.wavesoftware.utils.stringify.spi.theme;
 
 /**
+ * Theme represents a set of styles for object inspectors.
+ *
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
- * @since 2018-04-18
+ * @since 2.0.0
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
-public final class Earth extends Planet {
+public interface Theme {
+  default ComplexObjectStyle complexObject() {
+    return new ComplexObjectStyle() {};
+  }
 
-  private static final long serialVersionUID = 20180430201544L;
+  default MapStyle map() {
+    return new MapStyle() {};
+  }
 
-  @Inspect
-  private Moon moon;
-  @Inspect
-  private int dayOfYear;
-  @Inspect
-  private char type;
+  default CharacterStyle character() {
+    return new CharacterStyle() {};
+  }
 
+  default CharSequenceStyle charSequence() {
+    return new CharSequenceStyle() {};
+  }
 
-  Earth() {
-    super(true, "Earth");
+  default IterableStyle iterable() {
+    return new IterableStyle() {};
+  }
+
+  default JpaLazyStyle jpaLazy() {
+    return new JpaLazyStyle() {};
+  }
+
+  default RecursionStyle recursion() {
+    return new RecursionStyle() {};
   }
 }

@@ -16,8 +16,6 @@
 
 package pl.wavesoftware.utils.stringify.impl.inspector;
 
-import java.util.function.Function;
-
 /**
  * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
  * @since 1.0.0
@@ -29,8 +27,9 @@ final class RecursionInspector implements ObjectInspector {
   }
 
   @Override
-  public CharSequence inspect(Object object,
-                              Function<Object, CharSequence> alternative) {
-    return "(↻)";
+  public CharSequence inspect(Object object, InspectionContext context) {
+    return context.theme()
+      .recursion()
+      .representation(object);
   }
 }

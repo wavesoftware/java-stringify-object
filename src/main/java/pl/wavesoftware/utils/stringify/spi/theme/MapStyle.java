@@ -14,31 +14,26 @@
  * limitations under the License.
  */
 
-package pl.wavesoftware.utils.stringify;
-
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import pl.wavesoftware.utils.stringify.api.Inspect;
+package pl.wavesoftware.utils.stringify.spi.theme;
 
 /**
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
- * @since 2018-04-18
+ * @since 0.1.0
  */
-@Data
-@EqualsAndHashCode(callSuper = true)
-public final class Earth extends Planet {
+public interface MapStyle {
+  default CharSequence begin() {
+    return "{";
+  }
 
-  private static final long serialVersionUID = 20180430201544L;
+  default CharSequence separator() {
+    return ", ";
+  }
 
-  @Inspect
-  private Moon moon;
-  @Inspect
-  private int dayOfYear;
-  @Inspect
-  private char type;
+  default CharSequence entryEquals() {
+    return ": ";
+  }
 
-
-  Earth() {
-    super(true, "Earth");
+  default CharSequence end() {
+    return "}";
   }
 }

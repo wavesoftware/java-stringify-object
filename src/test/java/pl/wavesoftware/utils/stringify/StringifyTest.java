@@ -228,6 +228,20 @@ class StringifyTest {
     }
   }
 
+  @Test
+  void customLazyChecker() {
+    // given
+    Beta beta = new Beta();
+    beta.value = new StubLazy();
+
+    // when
+    Stringify stringifier = Stringify.of(beta);
+    CharSequence result = stringifier.stringify();
+
+    // then
+    assertThat(result.toString()).isEqualTo("<Beta value=⁂Lazy>");
+  }
+
   private static boolean inspectionPointValue(final InspectionPoint inspectionPoint,
                                               final Predicate<Object> predicate) {
     return predicate.test(

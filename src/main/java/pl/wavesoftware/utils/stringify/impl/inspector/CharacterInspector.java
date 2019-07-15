@@ -16,8 +16,6 @@
 
 package pl.wavesoftware.utils.stringify.impl.inspector;
 
-import java.util.function.Function;
-
 /**
  * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
  * @since 1.0.0
@@ -25,12 +23,14 @@ import java.util.function.Function;
 final class CharacterInspector implements ObjectInspector {
 
   @Override
-  public boolean consentTo(Object candidate, InspectionContext inspectionContext) {
+  public boolean consentTo(Object candidate, InspectionContext context) {
     return candidate instanceof Character;
   }
 
   @Override
-  public CharSequence inspect(Object object, Function<Object, CharSequence> alternative) {
-    return "'" + object.toString() + "'";
+  public CharSequence inspect(Object object, InspectionContext context) {
+    CharSequence quote = context.theme().character().quote();
+    StringBuilder stringBuilder = new StringBuilder(quote);
+    return stringBuilder.append(object.toString()).append(quote);
   }
 }

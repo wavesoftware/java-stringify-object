@@ -17,9 +17,12 @@
 package pl.wavesoftware.utils.stringify.impl;
 
 import pl.wavesoftware.utils.stringify.impl.inspector.InspectionContext;
+import pl.wavesoftware.utils.stringify.impl.inspector.RootInpector;
+import pl.wavesoftware.utils.stringify.spi.theme.Theme;
 
 import java.util.IdentityHashMap;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
@@ -28,14 +31,13 @@ import java.util.Map;
 final class DefaultInspectionContext implements InspectionContext {
   private static final Object CONTAIN = new Object();
 
-  private final Map<Object, Object> resolved;
+  private final Map<Object, Object> resolved = new IdentityHashMap<>();
+  private final Supplier<Theme> theme;
 
-  DefaultInspectionContext() {
-    this(new IdentityHashMap<>());
-  }
+  private RootInpector rootInpector;
 
-  private DefaultInspectionContext(Map<Object, Object> resolved) {
-    this.resolved = resolved;
+  DefaultInspectionContext(Supplier<Theme> theme) {
+    this.theme = theme;
   }
 
   @Override
@@ -44,7 +46,21 @@ final class DefaultInspectionContext implements InspectionContext {
   }
 
   @Override
-  public void markIsInspected(Object object) {
+  public void markAsInspected(Object object) {
     resolved.put(object, CONTAIN);
+  }
+
+  @Override
+  public RootInpector rootInspector() {
+    return rootInpector;
+  }
+
+  @Override
+  public Theme theme() {
+    return theme.get();
+  }
+
+  public void rootInpector(RootInpector rootInpector) {
+    this.rootInpector = rootInpector;
   }
 }
