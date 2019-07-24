@@ -33,7 +33,9 @@ final class InspectingFieldFactory {
 
   InspectingField create(InspectionPoint inspectionPoint,
                          BeanFactory beanFactory) {
-    return new InspectingFieldImpl(inspectionPoint, createPredicate(beanFactory));
+    return new InspectingFieldImpl(
+      inspectionPoint, createPredicate(beanFactory), beanFactory
+    );
   }
 
   private InspectFieldPredicate createPredicate(BeanFactory beanFactory) {

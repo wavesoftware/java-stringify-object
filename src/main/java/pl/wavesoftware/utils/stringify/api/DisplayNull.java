@@ -26,7 +26,7 @@ import java.lang.annotation.Target;
  * if it holds a null value.
  *
  * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
- * @since 27.04.18
+ * @since 1.0.0
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)

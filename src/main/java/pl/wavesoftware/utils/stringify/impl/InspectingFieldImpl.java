@@ -19,9 +19,15 @@ package pl.wavesoftware.utils.stringify.impl;
 import lombok.RequiredArgsConstructor;
 import pl.wavesoftware.utils.stringify.api.DisplayNull;
 import pl.wavesoftware.utils.stringify.api.InspectionPoint;
+import pl.wavesoftware.utils.stringify.api.Mask;
+import pl.wavesoftware.utils.stringify.spi.BeanFactory;
+import pl.wavesoftware.utils.stringify.spi.Masker;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
+import java.util.Optional;
+
+import static pl.wavesoftware.eid.utils.EidPreconditions.checkState;
 
 /**
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
@@ -31,6 +37,7 @@ import java.lang.reflect.Modifier;
 final class InspectingFieldImpl implements InspectingField {
   private final InspectionPoint inspectionPoint;
   private final InspectFieldPredicate predicate;
+  private final BeanFactory beanFactory;
 
   @Override
   public boolean shouldInspect() {
@@ -43,6 +50,30 @@ final class InspectingFieldImpl implements InspectingField {
     return !Modifier.isStatic(mods)
       && !field.isEnumConstant()
       && !field.isSynthetic();
+  }
+
+  @Override
+  public <T> Optional<Masker<T>> masker() {
+    Mask annotation = inspectionPoint.getField().getAnnotation(Mask.class);
+    return Optional.ofNullable(annotation)
+      .map(Mask::value)
+      .map(beanFactory::create)
+      .map(this::validate);
+  }
+
+  private <T> Masker<T> validate(Masker<?> masker) {
+    Class<?> validType = masker.type();
+    Field field = inspectionPoint.getField();
+    checkState(
+      field.getType().isAssignableFrom(validType),
+      "20190724:230843",
+      "Field {0} is annotated with masker of type {1}, but types " +
+        "are not compatible.",
+      field, validType
+    );
+    @SuppressWarnings("unchecked")
+    Masker<T> casted = (Masker<T>) masker;
+    return casted;
   }
 
   @Override
