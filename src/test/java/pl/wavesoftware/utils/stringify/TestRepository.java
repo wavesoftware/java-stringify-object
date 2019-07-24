@@ -54,7 +54,12 @@ public final class TestRepository {
   }
 
   SimpleUser createTestSimpleUser() {
-    return new SimpleUser("llohan", "1234567890", "555-123-445");
+    return new SimpleUser(
+      "llohan",
+      "1234567890",
+      "555-123-445",
+      "AB12 1234 1234 1234 1234 12"
+    );
   }
 
   Person createPerson() {

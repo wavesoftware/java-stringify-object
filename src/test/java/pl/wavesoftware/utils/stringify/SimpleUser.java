@@ -19,6 +19,7 @@ package pl.wavesoftware.utils.stringify;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import pl.wavesoftware.utils.stringify.api.DoNotInspect;
+import pl.wavesoftware.utils.stringify.api.Mask;
 
 /**
  * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
@@ -32,4 +33,6 @@ final class SimpleUser {
   private final String password;
   @DoNotInspect(conditionally = ProductionEnvironment.class)
   private final String phoneNumber;
+  @Mask(IbanMasker.class)
+  private final String iban;
 }

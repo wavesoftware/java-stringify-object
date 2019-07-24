@@ -14,37 +14,13 @@
  * limitations under the License.
  */
 
-package pl.wavesoftware.utils.stringify.impl;
+package pl.wavesoftware.utils.stringify;
 
 import pl.wavesoftware.utils.stringify.spi.Masker;
 
-import java.util.Optional;
-
 /**
- * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
- * @since 1.0.0
+ * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
+ * @since 2.0.0
  */
-interface InspectingField {
-  /**
-   * True if should inspect given field
-   *
-   * @return true, if should inspect
-   */
-  boolean shouldInspect();
-
-  /**
-   * Show null if true
-   *
-   * @return true - null will be shown
-   */
-  boolean showNull();
-
-  /**
-   * Provides a masker for a field if it is configured. Should validate do a type of a
-   * field and type of a master match.
-   *
-   * @param <T> a type of the masker
-   * @return a masker
-   */
-  <T> Optional<Masker<T>> masker();
+interface IbanMasker extends Masker<String> {
 }

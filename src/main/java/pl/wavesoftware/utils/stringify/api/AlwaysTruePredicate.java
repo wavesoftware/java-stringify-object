@@ -19,9 +19,10 @@ package pl.wavesoftware.utils.stringify.api;
 import java.util.function.Predicate;
 
 /**
- * A
+ * Always true as a predicate.
+ *
  * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
- * @since 27.04.18
+ * @since 1.0.0
  */
 public final class AlwaysTruePredicate implements Predicate<InspectionPoint> {
   @Override

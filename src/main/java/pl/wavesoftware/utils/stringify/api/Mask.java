@@ -16,29 +16,32 @@
 
 package pl.wavesoftware.utils.stringify.api;
 
+import pl.wavesoftware.utils.stringify.spi.Masker;
+
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.function.Predicate;
 
 /**
- * If {@link Mode} is set to {@link Mode#QUIET} (by default), this annotation
- * marks a field to be inspected to String representation of parent object.
+ * Will mask a field with a custom algorithm designed to mask confidential information,
+ * but display some representation of it.
  * <p>
- * If {@link Mode} is set to {@link Mode#PROMISCUOUS} this annotation has no function.
- *
+ * Example:
+ * <pre>
+ * &#064;Mask(PhoneMasker.class)
+ * private Phone phone;
+ * </pre>
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
- * @since 1.0.0
+ * @since 2.0.0
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.FIELD)
-public @interface Inspect {
+public @interface Mask {
   /**
-   * If given this predicate will be used to conditionally check if annotated field should
-   * be inspected. This can lead to implementing conditional logic of field inspection.
+   * A masker that will be used to mask this field.
    *
-   * @return a class of predicate to be used to determine if field should be inspected
+   * @return a masker
    */
-  Class<? extends Predicate<InspectionPoint>> conditionally() default AlwaysTruePredicate.class;
+  Class<? extends Masker<?>> value();
 }

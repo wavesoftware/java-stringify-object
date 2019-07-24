@@ -18,6 +18,7 @@ package pl.wavesoftware.utils.stringify;
 
 
 import lombok.RequiredArgsConstructor;
+import org.assertj.core.data.MapEntry;
 import org.junit.jupiter.api.Test;
 import pl.wavesoftware.utils.stringify.api.AlwaysTruePredicate;
 import pl.wavesoftware.utils.stringify.api.InspectionPoint;
@@ -32,6 +33,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.entry;
 
 
 /**
@@ -95,10 +97,14 @@ class StringifyTest {
   }
 
   @Test
-  void withCustomPredicate() {
+  void withCustomPredicateAndMasker() {
     // given
     SimpleUser user = testRepository.createTestSimpleUser();
     Stringify stringifier = Stringify.of(user);
+    stringifier.beanFactory(new StaticBeanFactory(
+      entry(ProductionEnvironment.class, new ProductionEnvironment()),
+      MapEntry.entry(IbanMasker.class, new IbanMaskerImpl())
+    ));
 
     // when
     ProductionEnvironment.setProduction(true);
@@ -107,9 +113,12 @@ class StringifyTest {
     String developmentResult = stringifier.toString();
 
     // then
-    assertThat(productionResult).isEqualTo("<SimpleUser login=\"llohan\">");
+    assertThat(productionResult).isEqualTo(
+      "<SimpleUser login=\"llohan\", iban=\"AB12 **** **** **** **** 12\">"
+    );
     assertThat(developmentResult).isEqualTo(
-      "<SimpleUser login=\"llohan\", password=\"1234567890\", phoneNumber=\"555-123-445\">"
+      "<SimpleUser login=\"llohan\", password=\"1234567890\"," +
+        " phoneNumber=\"555-123-445\", iban=\"AB12 **** **** **** **** 12\">"
     );
 
     assertThat(new AlwaysTruePredicate()).accepts(
@@ -283,8 +292,8 @@ class StringifyTest {
     private final Map<Class<?>, Object> instances = new HashMap<>();
 
     @SafeVarargs
-    StaticBeanFactory(Map.Entry<Class<?>, Predicate<InspectionPoint>>... entries) {
-      for (Map.Entry<Class<?>, Predicate<InspectionPoint>> entry : entries) {
+    StaticBeanFactory(Map.Entry<Class<?>, Object>... entries) {
+      for (Map.Entry<Class<?>, Object> entry : entries) {
         instances.put(entry.getKey(), entry.getValue());
       }
     }

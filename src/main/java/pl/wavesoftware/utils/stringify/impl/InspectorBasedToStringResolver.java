@@ -23,11 +23,14 @@ import pl.wavesoftware.utils.stringify.impl.inspector.InspectorModule;
 import pl.wavesoftware.utils.stringify.impl.inspector.ObjectInspector;
 import pl.wavesoftware.utils.stringify.spi.theme.ComplexObjectStyle;
 
+import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static pl.wavesoftware.eid.utils.EidExecutions.tryToExecute;
+import static pl.wavesoftware.eid.utils.EidPreconditions.checkNotNull;
 
 /**
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
@@ -131,13 +134,15 @@ final class InspectorBasedToStringResolver implements ToStringResolver {
   ) {
     tryToExecute(() -> {
       ensureAccessible(field);
-      Object value = field.get(target);
-      if (value == null) {
-        if (inspectingField.showNull()) {
-          properties.put(field.getName(), null);
-        }
-      } else {
-        properties.put(field.getName(), inspectObject(value));
+      @Nullable Object value = field.get(target);
+      Optional<CharSequence> maybeMasked = inspectingField.masker()
+        .map(masker -> masker.mask(value))
+        .map(masked -> checkNotNull(masked, "20190724:231722"));
+      @Nullable CharSequence inspected = maybeMasked.orElseGet(() ->
+        value != null ? inspectObject(value) : null
+      );
+      if (inspected != null || inspectingField.showNull()) {
+        properties.put(field.getName(), inspected);
       }
     }, "20130422:154938");
   }
