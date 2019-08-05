@@ -35,13 +35,15 @@ final class PromiscuousInspectFieldPredicate implements InspectFieldPredicate {
   private final BeanFactory beanFactory;
 
   @Override
-  public boolean shouldInspect(InspectionPoint inspectionPoint) {
+  public boolean shouldInspect(FieldInspectionPoint inspectionPoint) {
     DoNotInspect doNotInspect = inspectionPoint.getField()
+      .getFieldReflection()
       .getAnnotation(DoNotInspect.class);
     if (doNotInspect != null) {
       return shouldInspect(inspectionPoint, doNotInspect);
     } else {
       Inspect inspect = inspectionPoint.getField()
+        .getFieldReflection()
         .getAnnotation(Inspect.class);
       if (inspect != null && inspect.conditionally() != AlwaysTruePredicate.class) {
         Predicate<InspectionPoint> predicate = beanFactory.create(inspect.conditionally());

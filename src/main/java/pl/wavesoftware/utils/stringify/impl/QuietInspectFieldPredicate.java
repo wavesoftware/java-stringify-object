@@ -34,8 +34,9 @@ final class QuietInspectFieldPredicate implements InspectFieldPredicate {
   private final BeanFactory beanFactory;
 
   @Override
-  public boolean shouldInspect(InspectionPoint inspectionPoint) {
+  public boolean shouldInspect(FieldInspectionPoint inspectionPoint) {
     Inspect inspect = inspectionPoint.getField()
+      .getFieldReflection()
       .getAnnotation(Inspect.class);
     if (inspect != null) {
       return shouldInspect(inspectionPoint, inspect);

@@ -16,20 +16,22 @@
 
 package pl.wavesoftware.utils.stringify.spi.theme;
 
+import pl.wavesoftware.utils.stringify.api.InspectionPoint;
+
 /**
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
  * @since 2.0.0
  */
 public interface IterableStyle {
-  default CharSequence begin() {
+  default CharSequence begin(InspectionPoint point) {
     return "[";
   }
 
-  default CharSequence separator() {
+  default CharSequence separator(InspectionPoint point) {
     return ",";
   }
 
-  default CharSequence end() {
+  default CharSequence end(InspectionPoint point) {
     return "]";
   }
 }

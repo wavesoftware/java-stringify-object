@@ -18,9 +18,15 @@ package pl.wavesoftware.utils.stringify.impl;
 
 import pl.wavesoftware.utils.stringify.api.Configuration;
 import pl.wavesoftware.utils.stringify.api.Mode;
+import pl.wavesoftware.utils.stringify.api.Namespace;
+import pl.wavesoftware.utils.stringify.api.Store;
 import pl.wavesoftware.utils.stringify.impl.beans.BeansModule;
 import pl.wavesoftware.utils.stringify.spi.BeanFactory;
 import pl.wavesoftware.utils.stringify.spi.theme.Theme;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.function.Consumer;
 
 /**
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
@@ -30,9 +36,18 @@ final class DefaultConfiguration implements Configuration {
   private static final BeanFactory DEFAULT_BEAN_FACTORY =
     BeansModule.INSTANCE.defaultBeanFactory();
 
+  private final Map<Namespace, Store> stores;
   private Mode mode = Mode.DEFAULT_MODE;
   private BeanFactory beanFactory = DEFAULT_BEAN_FACTORY;
   private Theme theme = new Theme() {};
+
+  DefaultConfiguration() {
+    this(new HashMap<>());
+  }
+
+  private DefaultConfiguration(Map<Namespace, Store> stores) {
+    this.stores = stores;
+  }
 
   @Override
   public Configuration mode(Mode mode) {
@@ -52,8 +67,15 @@ final class DefaultConfiguration implements Configuration {
     return this;
   }
 
+  @Override
+  public Configuration store(Namespace namespace, Consumer<Store> storeConsumer) {
+    Store store = storeResolver(namespace);
+    storeConsumer.accept(store);
+    return this;
+  }
+
   DefaultConfiguration dup() {
-    DefaultConfiguration dup = new DefaultConfiguration();
+    DefaultConfiguration dup = new DefaultConfiguration(copyNamespaces());
     dup.beanFactory = beanFactory;
     dup.mode = mode;
     dup.theme = theme;
@@ -70,5 +92,22 @@ final class DefaultConfiguration implements Configuration {
 
   Theme getTheme() {
     return theme;
+  }
+
+  Store storeResolver(Namespace namespace) {
+    if (!stores.containsKey(namespace)) {
+      stores.put(namespace, new StoreImpl());
+    }
+    return stores.get(namespace);
+  }
+
+  private Map<Namespace, Store> copyNamespaces() {
+    Map<Namespace, Store> copy = new HashMap<>(stores.size());
+    for (Map.Entry<Namespace, Store> entry : stores.entrySet()) {
+      Namespace key = entry.getKey();
+      Store store = entry.getValue();
+      copy.put(key, new StoreImpl(store));
+    }
+    return copy;
   }
 }

@@ -16,32 +16,29 @@
 
 package pl.wavesoftware.utils.stringify.api;
 
-import java.util.function.Supplier;
+import java.util.Map.Entry;
+import java.util.Optional;
 
 /**
- * Represents a inspection point in some object, that is a field with value.
- *
- * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
- * @since 1.0.0
+ * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
+ * @since 2.0.0
  */
-public interface InspectionPoint {
+public interface Store extends Iterable<Entry<Object, Object>> {
   /**
-   * Get a field value supplier
+   * Puts a value on a key
    *
-   * @return a supplier of a field value
+   * @param key   a key
+   * @param value a value
    */
-  Supplier<Object> getValue();
+  void put(Object key, Object value);
 
   /**
-   * Get a type of a field
-   * @return a type of a field
-   */
-  Supplier<Class<?>> getType();
-
-  /**
-   * Gets a context object associated with this inspection point
+   * Gets a value set for a given key
    *
-   * @return a context object
+   * @param key          a key
+   * @param <T>          a type of value
+   * @param requiredType a type of value
+   * @return a value, or absent
    */
-  InspectionContext getContext();
+  <T> Optional<T> get(Object key, Class<T> requiredType);
 }

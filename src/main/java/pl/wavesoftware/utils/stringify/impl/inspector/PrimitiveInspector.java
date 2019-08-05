@@ -16,6 +16,8 @@
 
 package pl.wavesoftware.utils.stringify.impl.inspector;
 
+import pl.wavesoftware.utils.stringify.api.InspectionPoint;
+
 import java.time.temporal.Temporal;
 import java.util.Date;
 
@@ -26,13 +28,13 @@ import java.util.Date;
 final class PrimitiveInspector implements ObjectInspector {
 
   @Override
-  public boolean consentTo(Object candidate, InspectionContext context) {
-    return isPrimitive(candidate);
+  public boolean consentTo(InspectionPoint point, StringifierContext context) {
+    return isPrimitive(point.getValue().get());
   }
 
   @Override
-  public CharSequence inspect(Object object, InspectionContext context) {
-    return object.toString();
+  public CharSequence inspect(InspectionPoint point, StringifierContext context) {
+    return point.getValue().get().toString();
   }
 
   private static boolean isPrimitive(Object object) {

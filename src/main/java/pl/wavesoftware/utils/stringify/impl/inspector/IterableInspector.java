@@ -16,6 +16,7 @@
 
 package pl.wavesoftware.utils.stringify.impl.inspector;
 
+import pl.wavesoftware.utils.stringify.api.InspectionPoint;
 import pl.wavesoftware.utils.stringify.spi.theme.IterableStyle;
 
 /**
@@ -24,29 +25,35 @@ import pl.wavesoftware.utils.stringify.spi.theme.IterableStyle;
  */
 final class IterableInspector implements ObjectInspector {
   @Override
-  public boolean consentTo(Object candidate, InspectionContext context) {
-    return candidate instanceof Iterable;
+  public boolean consentTo(InspectionPoint point, StringifierContext context) {
+    return Iterable.class.isAssignableFrom(point.getType().get());
   }
 
   @Override
-  public CharSequence inspect(Object object, InspectionContext context) {
-    return inspectIterable((Iterable<?>) object, context);
+  public CharSequence inspect(InspectionPoint point, StringifierContext context) {
+    return inspectIterable((Iterable<?>) point.getValue().get(), point, context);
   }
 
   private static CharSequence inspectIterable(
-    Iterable<?> iterable, InspectionContext context
+    Iterable<?> iterable,
+    InspectionPoint point,
+    StringifierContext context
   ) {
     IterableStyle style = context.theme().iterable();
     StringBuilder sb = new StringBuilder();
-    sb.append(style.begin());
+    sb.append(style.begin(point));
     for (Object elem : iterable) {
-      sb.append(context.rootInspector().apply(elem));
-      sb.append(style.separator());
+      InspectionPoint subPoint =
+        InspectorModule.INSTANCE.objectInspectionPoint(elem, point::getContext);
+      sb.append(context.rootInspector().apply(subPoint));
+      sb.append(style.separator(point));
     }
-    if (sb.length() > style.begin().length()) {
-      sb.deleteCharAt(sb.length() - style.separator().length());
+    if (sb.length() > style.begin(point).length()) {
+      for (int i=0; i < style.separator(point).length(); i++) {
+        sb.deleteCharAt(sb.length() - 1);
+      }
     }
-    sb.append(style.end());
+    sb.append(style.end(point));
     return sb.toString();
   }
 }

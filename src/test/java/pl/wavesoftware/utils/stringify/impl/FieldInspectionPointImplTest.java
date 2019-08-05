@@ -17,7 +17,12 @@
 package pl.wavesoftware.utils.stringify.impl;
 
 import org.junit.jupiter.api.Test;
+import pl.wavesoftware.utils.stringify.api.InspectionContext;
 import pl.wavesoftware.utils.stringify.api.InspectionPoint;
+import pl.wavesoftware.utils.stringify.api.Mode;
+import pl.wavesoftware.utils.stringify.api.Namespace;
+import pl.wavesoftware.utils.stringify.api.Store;
+import pl.wavesoftware.utils.stringify.impl.inspector.InspectorModule;
 
 import java.lang.reflect.Field;
 
@@ -27,7 +32,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
  * @since 30.04.18
  */
-class InspectionPointImplTest {
+class FieldInspectionPointImplTest {
 
   @Test
   void testGetValueSupplier() throws NoSuchFieldException {
@@ -35,14 +40,28 @@ class InspectionPointImplTest {
     Sample sample = new Sample();
     sample.ala = "ma";
     Field alaField = Sample.class.getDeclaredField("ala");
-    alaField.setAccessible(true);
-    InspectionPoint inspectionPoint = new InspectionPointImpl(alaField, sample);
+    InspectionContext ctx = InspectorModule.INSTANCE
+      .inspectionContext(this::constantStore);
+    InspectingFieldFactory inspectingFieldFactory =
+      new InspectingFieldFactory(() -> Mode.DEFAULT_MODE);
+    InspectingField inspectingField = inspectingFieldFactory.create(
+      alaField, sample, this::beanFactory
+    );
+    InspectionPoint inspectionPoint = new FieldInspectionPointImpl(inspectingField, ctx);
 
     // when
-    Object value = inspectionPoint.getValueSupplier().get();
+    Object value = inspectionPoint.getValue().get();
 
     // then
     assertThat(value).isEqualTo("ma");
+  }
+
+  private <T> T beanFactory(Class<T> contract) {
+    throw new UnsupportedOperationException("Not yet implemented");
+  }
+
+  private Store constantStore(Namespace namespace) {
+    return new StoreImpl();
   }
 
   private static final class Sample {

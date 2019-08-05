@@ -19,8 +19,13 @@ package pl.wavesoftware.utils.stringify;
 import pl.wavesoftware.utils.stringify.api.Configuration;
 import pl.wavesoftware.utils.stringify.api.Inspect;
 import pl.wavesoftware.utils.stringify.api.Mode;
+import pl.wavesoftware.utils.stringify.api.Namespace;
+import pl.wavesoftware.utils.stringify.api.Store;
 import pl.wavesoftware.utils.stringify.impl.DefaultStringify;
 import pl.wavesoftware.utils.stringify.spi.BeanFactory;
+import pl.wavesoftware.utils.stringify.spi.theme.Theme;
+
+import java.util.function.Consumer;
 
 /**
  * <h1>Stringify Object for Java</h1>
@@ -129,4 +134,10 @@ public interface Stringify extends Configuration, CharSequence {
 
   @Override
   Stringify beanFactory(BeanFactory beanFactory);
+
+  @Override
+  Stringify theme(Theme theme);
+
+  @Override
+  Stringify store(Namespace namespace, Consumer<Store> storeConsumer);
 }

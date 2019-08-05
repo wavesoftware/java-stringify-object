@@ -16,6 +16,7 @@
 
 package pl.wavesoftware.utils.stringify.impl.inspector;
 
+import pl.wavesoftware.utils.stringify.api.InspectionPoint;
 import pl.wavesoftware.utils.stringify.impl.jpa.JpaModule;
 
 /**
@@ -24,16 +25,16 @@ import pl.wavesoftware.utils.stringify.impl.jpa.JpaModule;
  */
 final class JpaLazyInspector implements ObjectInspector {
   @Override
-  public boolean consentTo(Object candidate, InspectionContext context) {
+  public boolean consentTo(InspectionPoint point, StringifierContext context) {
     return JpaModule.INSTANCE
       .lazyChecker()
-      .isLazy(candidate);
+      .isLazy(point.getValue().get());
   }
 
   @Override
-  public CharSequence inspect(Object object, InspectionContext context) {
+  public CharSequence inspect(InspectionPoint point, StringifierContext context) {
     return context.theme()
       .jpaLazy()
-      .representation(object);
+      .representation(point);
   }
 }

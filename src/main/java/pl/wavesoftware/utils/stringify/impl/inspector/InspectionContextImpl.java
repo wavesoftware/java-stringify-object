@@ -16,16 +16,32 @@
 
 package pl.wavesoftware.utils.stringify.impl.inspector;
 
-import pl.wavesoftware.utils.stringify.api.InspectionPoint;
+import pl.wavesoftware.utils.stringify.api.IndentationControl;
+import pl.wavesoftware.utils.stringify.api.InspectionContext;
+import pl.wavesoftware.utils.stringify.api.Namespace;
+import pl.wavesoftware.utils.stringify.api.Store;
 
 import java.util.function.Function;
 
 /**
- * An root inspector is a reference to the entrypoint of this library, a class
- * configured ready to inspect an object.
- *
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
  * @since 2.0.0
  */
-public interface RootInpector extends Function<InspectionPoint, CharSequence> {
+final class InspectionContextImpl implements InspectionContext {
+  private final Function<Namespace, Store> storeResolver;
+  private final IndentationControl indentationControl = new IndentationControlImpl();
+
+  InspectionContextImpl(Function<Namespace, Store> storeResolver) {
+    this.storeResolver = storeResolver;
+  }
+
+  @Override
+  public IndentationControl indentationControl() {
+    return indentationControl;
+  }
+
+  @Override
+  public Store named(Namespace namespace) {
+    return storeResolver.apply(namespace);
+  }
 }

@@ -16,32 +16,25 @@
 
 package pl.wavesoftware.utils.stringify.api;
 
-import java.util.function.Supplier;
-
 /**
- * Represents a inspection point in some object, that is a field with value.
+ * An context of current inspection.
  *
- * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
- * @since 1.0.0
+ * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
+ * @since 2.0.0
  */
-public interface InspectionPoint {
+public interface InspectionContext {
   /**
-   * Get a field value supplier
+   * Control of indentation.
    *
-   * @return a supplier of a field value
+   * @return a control of indentation
    */
-  Supplier<Object> getValue();
+  IndentationControl indentationControl();
 
   /**
-   * Get a type of a field
-   * @return a type of a field
-   */
-  Supplier<Class<?>> getType();
-
-  /**
-   * Gets a context object associated with this inspection point
+   * A named, general purpose store
    *
-   * @return a context object
+   * @param namespace a namespace of a store
+   * @return a store
    */
-  InspectionContext getContext();
+  Store named(Namespace namespace);
 }

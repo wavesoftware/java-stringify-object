@@ -18,7 +18,7 @@ package pl.wavesoftware.utils.stringify.impl;
 
 import pl.wavesoftware.utils.stringify.api.InspectionPoint;
 import pl.wavesoftware.utils.stringify.impl.beans.BeanFactoryCache;
-import pl.wavesoftware.utils.stringify.impl.inspector.InspectionContext;
+import pl.wavesoftware.utils.stringify.impl.inspector.StringifierContext;
 import pl.wavesoftware.utils.stringify.impl.inspector.InspectorModule;
 import pl.wavesoftware.utils.stringify.impl.inspector.ObjectInspector;
 import pl.wavesoftware.utils.stringify.spi.theme.ComplexObjectStyle;
@@ -41,52 +41,52 @@ final class InspectorBasedToStringResolver implements ToStringResolver {
     InspectorModule.INSTANCE.inspectors();
 
   private final DefaultConfiguration configuration;
-  private final Object target;
-  private final InspectionContext inspectionContext;
+  private final InspectionPoint point;
+  private final StringifierContext stringifierContext;
   private final BeanFactoryCache beanFactoryCache;
   private final InspectingFieldFactory inspectingFieldFactory;
 
   InspectorBasedToStringResolver(
     DefaultConfiguration configuration,
-    Object target,
-    InspectionContext inspectionContext,
+    InspectionPoint point,
+    StringifierContext stringifierContext,
     BeanFactoryCache beanFactoryCache,
     InspectingFieldFactory inspectingFieldFactory
   ) {
     this.configuration = configuration;
-    this.target = target;
-    this.inspectionContext = inspectionContext;
+    this.point = point;
+    this.stringifierContext = stringifierContext;
     this.beanFactoryCache = beanFactoryCache;
     this.inspectingFieldFactory = inspectingFieldFactory;
   }
 
   @Override
   public CharSequence resolve() {
-    inspectionContext.markAsInspected(target);
-    ComplexObjectStyle style = inspectionContext.theme().complexObject();
+    stringifierContext.markAsInspected(point.getValue().get());
+    ComplexObjectStyle style = stringifierContext.theme().complexObject();
     StringBuilder sb = new StringBuilder();
-    sb.append(style.begin());
-    sb.append(style.name(target));
+    sb.append(style.begin(point));
+    sb.append(style.name(point));
     CharSequence props = propertiesForToString();
     if (props.length() != 0) {
-      sb.append(style.nameSeparator());
+      sb.append(style.nameSeparator(point));
       sb.append(props);
     }
-    sb.append(style.end());
+    sb.append(style.end(point));
     return sb;
   }
 
   private CharSequence propertiesForToString() {
     Map<String, CharSequence> props;
-    props = inspectTargetAsClass(target.getClass());
-    ComplexObjectStyle style = inspectionContext.theme().complexObject();
+    props = inspectTargetAsClass(point.getType().get());
+    ComplexObjectStyle style = stringifierContext.theme().complexObject();
     StringBuilder sb = new StringBuilder();
-    CharSequence propertySeparator = style.propertySeparator();
+    CharSequence propertySeparator = style.propertySeparator(point);
     for (Map.Entry<String, CharSequence> entry : props.entrySet()) {
       String fieldName = entry.getKey();
       CharSequence fieldStringValue = entry.getValue();
       sb.append(fieldName);
-      sb.append(style.propertyEquals());
+      sb.append(style.propertyEquals(point));
       sb.append(fieldStringValue);
       sb.append(propertySeparator);
     }
@@ -114,55 +114,50 @@ final class InspectorBasedToStringResolver implements ToStringResolver {
     Field[] fields, Map<String, CharSequence> properties
   ) {
     for (Field field : fields) {
-      InspectionPoint inspectionPoint = createInspectionPoint(field);
       InspectingField inspectingField = inspectingFieldFactory
-        .create(inspectionPoint, beanFactoryCache);
-      if (inspectingField.shouldInspect()) {
-        inspectAnnotatedField(properties, field, inspectingField);
+        .create(field, point.getValue().get(), beanFactoryCache);
+      FieldInspectionPoint inspectionPoint = createInspectionPoint(inspectingField);
+      if (inspectingField.shouldInspect(inspectionPoint)) {
+        inspectAnnotatedField(properties, inspectionPoint, inspectingField);
       }
     }
   }
 
-  private InspectionPoint createInspectionPoint(Field field) {
-    return new InspectionPointImpl(field, target);
+  private FieldInspectionPoint createInspectionPoint(InspectingField field) {
+    return new FieldInspectionPointImpl(
+      field, stringifierContext.inspectionContext()
+    );
   }
 
   private void inspectAnnotatedField(
     final Map<String, CharSequence> properties,
-    final Field field,
+    final InspectionPoint inspectionPoint,
     final InspectingField inspectingField
   ) {
     tryToExecute(() -> {
-      ensureAccessible(field);
-      @Nullable Object value = field.get(target);
+      @Nullable Object value = inspectionPoint.getValue().get();
       Optional<CharSequence> maybeMasked = inspectingField.masker()
         .map(masker -> masker.mask(value))
         .map(masked -> checkNotNull(masked, "20190724:231722"));
       @Nullable CharSequence inspected = maybeMasked.orElseGet(() ->
-        value != null ? inspectObject(value) : null
+        value != null ? inspectObject(inspectionPoint) : null
       );
       if (inspected != null || inspectingField.showNull()) {
-        properties.put(field.getName(), inspected);
+        properties.put(inspectingField.getName(), inspected);
       }
     }, "20130422:154938");
   }
 
-  private static void ensureAccessible(Field field) {
-    if (!field.isAccessible()) {
-      field.setAccessible(true);
-    }
-  }
-
-  CharSequence inspectObject(Object object) {
+  CharSequence inspectObject(InspectionPoint point) {
     for (ObjectInspector inspector : OBJECT_INSPECTORS) {
-      if (inspector.consentTo(object, inspectionContext)) {
-        return inspector.inspect(object, inspectionContext);
+      if (inspector.consentTo(point, stringifierContext)) {
+        return inspector.inspect(point, stringifierContext);
       }
     }
     ToStringResolverImpl sub = new ToStringResolverImpl(
-      object,
+      point,
       configuration,
-      inspectionContext,
+      stringifierContext,
       beanFactoryCache,
       inspectingFieldFactory
     );

@@ -1,4 +1,4 @@
-== Stringify Object for Java
+= Stringify Object for Java
 
 https://travis-ci.org/wavesoftware/java-stringify-object[image:https://travis-ci.org/wavesoftware/java-stringify-object.svg?branch=master[Build
 Status]]
@@ -22,20 +22,20 @@ inspected.
 This library has proper support for object graph cycles, and JPA
 (Hibernate) lazy loaded elements.
 
-=== Usage
+== Usage
 
-==== In Promiscuous mode
+=== In Promiscuous mode
 
 [source,java]
 ----
 // In PROMISCUOUS mode define fields to exclude
 class Person {
   private int id;
-  @DisplayNull
+  @DisplayNull // <1>
   private Person parent;
   private List<Person> childs;
   private Account account;
-  @Inspect(conditionally = IsInDevelopment.class)
+  @Inspect(conditionally = IsInDevelopment.class) // <2>
   private String password;
   @DoNotInspect
   private String ignored;
@@ -46,12 +46,15 @@ List<Person> people = query.getResultList();
 Stringify stringify = Stringify.of(people);
 stringify.mode(Mode.PROMISCUOUS);
 // stringify.beanFactory(...);
-assert "<Person id=15, parent=<Person id=16, parent=null, "  
+assert "[<Person id=15, parent=<Person id=16, parent=null, "
  + "childs=[(↻)], account=⁂Lazy>, childs=[], "  
- + "account=⁂Lazy>".equals(stringify.toString());  
+ + "account=⁂Lazy>]".equals(stringify.toString());
 ----
 
-==== In Quiet mode
+<1> Configures a field inspection to show null values
+<2> Inspects a field, but only if given predicate returns `true`
+
+=== In Quiet mode
 
 [source,java]
 ----
@@ -68,12 +71,12 @@ class Person {
 List<Person> people = query.getResultList();  
 Stringify stringify = Stringify.of(people);
 stringify.mode(Mode.QUIET);
-assert "<Person id=15, parent=<Person id=16, parent=null, "  
+assert "[<Person id=15, parent=<Person id=16, parent=null, "
  + "childs=[(↻)], account=⁂Lazy>, childs=[], "  
- + "account=⁂Lazy>".equals(stringify.toString());  
+ + "account=⁂Lazy>]".equals(stringify.toString());
 ----
 
-=== Features
+== Features
 
 * String representation of any Java class in two modes `+PROMISCUOUS+`
 and `+QUIET+`
@@ -83,7 +86,7 @@ and `+QUIET+`
 instead
 
 [[vs-lombok-tostring]]
-=== vs. Lombok @ToString
+== vs. Lombok @ToString
 
 Stringify Object for Java is designed for *slightly different* use case
 then Lombok.
@@ -95,13 +98,13 @@ Stringify Object for Java is designed to inspect complex objects that
 can have cycles and can be managed by JPA provider like Hibernate
 (introducing Lazy Loading problems).
 
-==== Pros of Lombok vs Stringify Object
+=== Pros of Lombok vs Stringify Object
 
 * Lombok is *fast* - it's statically generated code without using
 Reflection API.
 * Lombok is *easy* - it's zero configuration in most cases.
 
-==== Cons of Lombok vs Stringify Object
+=== Cons of Lombok vs Stringify Object
 
 * Lombok can't *detect cycles* is object graph, which implies
 `+StackOverflowException+` being thrown in that case
@@ -110,12 +113,12 @@ loading it from JPA by invoking SQL statements. It's typical *n+1
 problem*, but with nasty consequences - your `+toString()+` method is
 invoking SQL without your knowledge!!
 
-=== Configuration
+== Configuration
 
 Configuration is done in two ways: declarative - using Java's service
 loader mechanism, and programmatic.
 
-==== Configuration using Service Loader
+=== Configuration using Service Loader
 
 A `+Configurator+` interface is intended to be implemented in user code,
 and assigned to https://www.baeldung.com/java-spi[Service Loader]
@@ -186,7 +189,7 @@ class SpringBeanFactory implements BeanFactory, BootingAware {
 }
 ----
 
-==== Programmatic configuration
+=== Programmatic configuration
 
 You can also fine tune you configuration on instance level - using
 methods available at `+Stringify+` interface:
@@ -205,13 +208,13 @@ stringifier
   .stringify();
 ----
 
-=== Dependencies
+== Dependencies
 
 * Java >= 8
 * https://github.com/wavesoftware/java-eid-exceptions[EID Exceptions]
 library
 
-==== Contributing
+=== Contributing
 
 Contributions are welcome!
 

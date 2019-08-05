@@ -16,12 +16,14 @@
 
 package pl.wavesoftware.utils.stringify.spi.theme;
 
+import pl.wavesoftware.utils.stringify.api.InspectionPoint;
+
 /**
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
  * @since 2.0.0
  */
 public interface CharacterStyle {
-  default CharSequence quote() {
+  default CharSequence quote(InspectionPoint point) {
     return "'";
   }
 }

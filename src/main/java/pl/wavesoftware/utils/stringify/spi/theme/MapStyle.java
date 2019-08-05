@@ -16,24 +16,26 @@
 
 package pl.wavesoftware.utils.stringify.spi.theme;
 
+import pl.wavesoftware.utils.stringify.api.InspectionPoint;
+
 /**
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
  * @since 0.1.0
  */
 public interface MapStyle {
-  default CharSequence begin() {
+  default CharSequence begin(InspectionPoint point) {
     return "{";
   }
 
-  default CharSequence separator() {
+  default CharSequence separator(InspectionPoint point) {
     return ", ";
   }
 
-  default CharSequence entryEquals() {
+  default CharSequence entryEquals(InspectionPoint point) {
     return ": ";
   }
 
-  default CharSequence end() {
+  default CharSequence end(InspectionPoint point) {
     return "}";
   }
 }

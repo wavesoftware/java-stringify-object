@@ -16,6 +16,7 @@
 
 package pl.wavesoftware.utils.stringify.impl.inspector;
 
+import pl.wavesoftware.utils.stringify.api.InspectionPoint;
 import pl.wavesoftware.utils.stringify.spi.theme.MapStyle;
 
 import java.util.Map;
@@ -27,30 +28,34 @@ import java.util.Map;
 final class MapInspector implements ObjectInspector {
 
   @Override
-  public boolean consentTo(Object candidate, InspectionContext context) {
-    return candidate instanceof Map;
+  public boolean consentTo(InspectionPoint point, StringifierContext context) {
+    return Map.class.isAssignableFrom(point.getType().get());
   }
 
   @Override
-  public CharSequence inspect(Object object, InspectionContext context) {
-    Map<?, ?> map = (Map<?, ?>) object;
+  public CharSequence inspect(InspectionPoint point, StringifierContext context) {
+    Map<?, ?> map = (Map<?, ?>) point.getValue().get();
     MapStyle style = context.theme().map();
     StringBuilder sb = new StringBuilder();
-    sb.append(style.begin());
+    sb.append(style.begin(point));
     for (Map.Entry<?, ?> entry : map.entrySet()) {
       Object key = entry.getKey();
+      InspectionPoint keyPoint =
+        InspectorModule.INSTANCE.objectInspectionPoint(key, point::getContext);
       Object value = entry.getValue();
-      sb.append(context.rootInspector().apply(key));
-      sb.append(style.entryEquals());
-      sb.append(context.rootInspector().apply(value));
-      sb.append(style.separator());
+      InspectionPoint valuePoint =
+        InspectorModule.INSTANCE.objectInspectionPoint(value, point::getContext);
+      sb.append(context.rootInspector().apply(keyPoint));
+      sb.append(style.entryEquals(point));
+      sb.append(context.rootInspector().apply(valuePoint));
+      sb.append(style.separator(point));
     }
     if (!map.isEmpty()) {
-      for (int i=0; i < style.separator().length(); i++) {
+      for (int i=0; i < style.separator(point).length(); i++) {
         sb.deleteCharAt(sb.length() - 1);
       }
     }
-    sb.append(style.end());
+    sb.append(style.end(point));
     return sb.toString();
   }
 }

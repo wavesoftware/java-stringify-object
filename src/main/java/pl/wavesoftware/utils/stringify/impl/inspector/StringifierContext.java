@@ -16,6 +16,7 @@
 
 package pl.wavesoftware.utils.stringify.impl.inspector;
 
+import pl.wavesoftware.utils.stringify.api.InspectionContext;
 import pl.wavesoftware.utils.stringify.spi.theme.Theme;
 
 /**
@@ -25,7 +26,7 @@ import pl.wavesoftware.utils.stringify.spi.theme.Theme;
  * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
  * @since 1.0.0
  */
-public interface InspectionContext {
+public interface StringifierContext {
   /**
    * Determine if given object was already inspected.
    *
@@ -54,4 +55,11 @@ public interface InspectionContext {
    * @return a theme
    */
   Theme theme();
+
+  /**
+   * Current inspection context
+   *
+   * @return a current inspection context
+   */
+  InspectionContext inspectionContext();
 }
