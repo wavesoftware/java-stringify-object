@@ -2,10 +2,8 @@
 
 https://travis-ci.org/wavesoftware/java-stringify-object[image:https://travis-ci.org/wavesoftware/java-stringify-object.svg?branch=master[Build
 Status]]
-https://sonar.wavesoftware.pl/dashboard/index/pl.wavesoftware.utils:stringify-object[image:https://sonar.wavesoftware.pl/api/badges/gate?key=pl.wavesoftware.utils:stringify-object[Quality
-Gate]]
-https://coveralls.io/github/wavesoftware/java-stringify-object?branch=master[image:https://coveralls.io/repos/github/wavesoftware/java-stringify-object/badge.svg?branch=master[Coverage
-Status]]
+https://sonarcloud.io/dashboard?id=wavesoftware_java-stringify-object[image:https://sonarcloud.io/api/project_badges/measure?project=wavesoftware_java-stringify-object&metric=alert_status[Quality Gate]]
+https://sonarcloud.io/dashboard?id=wavesoftware_java-stringify-object[image:https://sonarcloud.io/api/project_badges/measure?project=wavesoftware_java-stringify-object&metric=coverage[Coverage]]
 https://bintray.com/bintray/jcenter/pl.wavesoftware.utils%3Astringify-object[image:https://img.shields.io/maven-central/v/pl.wavesoftware.utils/stringify-object.svg[Maven
 Central]]
 
