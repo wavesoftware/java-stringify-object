@@ -20,6 +20,8 @@ import java.util.Map.Entry;
 import java.util.Optional;
 
 /**
+ * This store hold various data, provided by users. Those values can be read by themes.
+ *
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
  * @since 2.0.0
  */
