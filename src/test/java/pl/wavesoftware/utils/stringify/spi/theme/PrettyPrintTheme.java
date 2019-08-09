@@ -1,10 +1,20 @@
 package pl.wavesoftware.utils.stringify.spi.theme;
 
 import pl.wavesoftware.utils.stringify.api.InspectionPoint;
+import pl.wavesoftware.utils.stringify.api.Namespace;
+import pl.wavesoftware.utils.stringify.api.Store;
 
 final class PrettyPrintTheme implements Theme {
 
-  private static final String INDENT = "  ";
+  private static final String DEFAULT_INDENT = "  ";
+
+  private static CharSequence indent(InspectionPoint point) {
+    Store store = point.getContext().store(Namespace.GLOBAL);
+    CharSequence indentRepr = store
+      .get("indentation", CharSequence.class)
+      .orElse(DEFAULT_INDENT);
+    return point.getContext().indentationControl().indent(indentRepr);
+  }
 
   private static CharSequence name(Object target) {
     return target.getClass().getSimpleName()
@@ -24,19 +34,18 @@ final class PrettyPrintTheme implements Theme {
       @Override
       public CharSequence name(InspectionPoint point) {
         return PrettyPrintTheme.name(point.getValue().get())
-          + "\n" +
-          point.getContext().indentationControl().indent(INDENT);
+          + "\n" + indent(point);
       }
 
       @Override
       public CharSequence end(InspectionPoint point) {
         point.getContext().indentationControl().decrement();
-        return "\n" + point.getContext().indentationControl().indent(INDENT) + ")";
+        return "\n" + indent(point) + ")";
       }
 
       @Override
       public CharSequence propertySeparator(InspectionPoint point) {
-        return ",\n" + point.getContext().indentationControl().indent(INDENT);
+        return ",\n" + indent(point);
       }
 
       @Override
@@ -57,13 +66,12 @@ final class PrettyPrintTheme implements Theme {
       @Override
       public CharSequence begin(InspectionPoint point) {
         point.getContext().indentationControl().increment();
-        return "{\n" +
-          point.getContext().indentationControl().indent(INDENT);
+        return "{\n" + indent(point);
       }
 
       @Override
       public CharSequence separator(InspectionPoint point) {
-        return ",\n" + point.getContext().indentationControl().indent(INDENT);
+        return ",\n" + indent(point);
       }
 
       @Override
@@ -74,7 +82,7 @@ final class PrettyPrintTheme implements Theme {
       @Override
       public CharSequence end(InspectionPoint point) {
         point.getContext().indentationControl().decrement();
-        return "\n" + point.getContext().indentationControl().indent(INDENT) + "}";
+        return "\n" + indent(point) + "}";
       }
     };
   }

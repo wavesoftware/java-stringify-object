@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 import pl.wavesoftware.utils.stringify.Earth;
 import pl.wavesoftware.utils.stringify.Stringify;
 import pl.wavesoftware.utils.stringify.TestRepository;
+import pl.wavesoftware.utils.stringify.api.Namespace;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -12,11 +13,12 @@ class ThemeTest {
   private final TestRepository testRepository = new TestRepository();
 
   @Test
-  void customTheme() {
+  void prettyPrintTheme() {
     // given
     Earth planet = (Earth) testRepository.createTestPlanet();
     Stringify stringifier = Stringify.of(planet);
     stringifier.theme(new PrettyPrintTheme());
+    stringifier.store(Namespace.GLOBAL, store -> store.put("indentation", "  "));
     CharSequence earthHash = hash(planet);
     CharSequence planetSystemHash = hash(planet.getPlanetSystem());
     CharSequence moonHash = hash(planet.getMoon());

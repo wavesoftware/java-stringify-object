@@ -20,7 +20,7 @@ import pl.wavesoftware.utils.stringify.api.InspectionPoint;
 
 /**
  * Represents a basic object inspector that can handle specific type of object, which
- * is determined by call to {@link #consentTo(Object, StringifierContext)}
+ * is determined by call to {@link #consentTo(InspectionPoint, StringifierContext)}
  * method.
  *
  * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>

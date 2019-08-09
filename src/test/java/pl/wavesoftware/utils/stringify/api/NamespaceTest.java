@@ -16,25 +16,44 @@
 
 package pl.wavesoftware.utils.stringify.api;
 
+import org.junit.jupiter.api.Test;
+
+import static org.assertj.core.api.Assertions.*;
+
 /**
- * An context of current inspection.
- *
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
  * @since 2.0.0
  */
-public interface InspectionContext {
-  /**
-   * Control of indentation.
-   *
-   * @return a control of indentation
-   */
-  IndentationControl indentationControl();
+class NamespaceTest {
 
-  /**
-   * A named, general purpose store
-   *
-   * @param namespace a namespace of a store
-   * @return a store
-   */
-  Store store(Namespace namespace);
+  @Test
+  void equalsToItself() {
+    // given
+    Namespace ns = Namespace.GLOBAL;
+
+    // then
+    assertThat(ns).isEqualTo(Namespace.GLOBAL);
+  }
+
+  @Test
+  void doNotEqualNull() {
+    // then
+    assertThat(Namespace.GLOBAL).isNotEqualTo(null);
+  }
+
+  @Test
+  void doNotEqualOtherType() {
+    // then
+    assertThat(Namespace.GLOBAL).isNotEqualTo("test");
+  }
+
+  @Test
+  void equalsByParts() {
+    // when
+    Namespace ns1 = Namespace.create("alice", true, "bob");
+    Namespace ns2 = Namespace.create("alice", true, "bob");
+
+    // then
+    assertThat(ns1).isEqualTo(ns2);
+  }
 }

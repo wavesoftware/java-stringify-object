@@ -41,7 +41,7 @@ final class InspectionContextImpl implements InspectionContext {
   }
 
   @Override
-  public Store named(Namespace namespace) {
+  public Store store(Namespace namespace) {
     return storeResolver.apply(namespace);
   }
 }

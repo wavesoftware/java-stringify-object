@@ -43,6 +43,8 @@ public final class Namespace {
    * <p>The order of the {@code parts} is significant.
    *
    * <p>Internally the {@code parts} are compared using {@link Object#equals(Object)}.
+   * @param parts a list of parts that should build a namespace
+   * @return a created namespace
    */
   public static Namespace create(Object... parts) {
     checkArgument(parts.length > 0, "20190805:223659");
