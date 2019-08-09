@@ -16,20 +16,22 @@
 
 package pl.wavesoftware.utils.stringify.impl.inspector;
 
+import pl.wavesoftware.utils.stringify.api.InspectionPoint;
+
 /**
  * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
  * @since 1.0.0
  */
 final class RecursionInspector implements ObjectInspector {
   @Override
-  public boolean consentTo(Object candidate, InspectionContext context) {
-    return context.wasInspected(candidate);
+  public boolean consentTo(InspectionPoint point, StringifierContext context) {
+    return context.wasInspected(point.getValue().get());
   }
 
   @Override
-  public CharSequence inspect(Object object, InspectionContext context) {
+  public CharSequence inspect(InspectionPoint point, StringifierContext context) {
     return context.theme()
       .recursion()
-      .representation(object);
+      .representation(point);
   }
 }

@@ -14,32 +14,14 @@
  * limitations under the License.
  */
 
-package pl.wavesoftware.utils.stringify.impl.beans;
+package pl.wavesoftware.utils.stringify.impl;
 
 import pl.wavesoftware.utils.stringify.api.InspectionPoint;
-import pl.wavesoftware.utils.stringify.spi.BeanFactory;
-
-import java.util.function.Supplier;
 
 /**
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
  * @since 2.0.0
  */
-public enum BeansModule {
-  INSTANCE;
-
-  public BeanFactory defaultBeanFactory() {
-    return new DefaultBeanFactory();
-  }
-
-  public BeanFactoryCache cachedBeanFactory(
-    Supplier<BeanFactory> beanFactory,
-    InspectionPoint inspectionPoint
-  ) {
-    return new DefaultBeanFactoryCache(() ->
-      new FallbackBootFactory(
-        new BootAwareBootFactory(beanFactory, inspectionPoint)
-      )
-    );
-  }
+public interface FieldInspectionPoint extends InspectionPoint {
+  InspectingField getField();
 }

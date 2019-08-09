@@ -25,15 +25,14 @@ import pl.wavesoftware.utils.stringify.api.InspectionPoint;
 import pl.wavesoftware.utils.stringify.api.Mode;
 import pl.wavesoftware.utils.stringify.spi.BeanFactory;
 
-import java.lang.reflect.Field;
 import java.util.AbstractMap;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.entry;
+import static org.mockito.Mockito.mock;
 
 
 /**
@@ -122,22 +121,7 @@ class StringifyTest {
     );
 
     assertThat(new AlwaysTruePredicate()).accepts(
-      new InspectionPoint() {
-        @Override
-        public Field getField() {
-          return null;
-        }
-
-        @Override
-        public Object getContainingObject() {
-          return null;
-        }
-
-        @Override
-        public Supplier<Object> getValueSupplier() {
-          return null;
-        }
-      }
+      mock(InspectionPoint.class)
     );
   }
 
@@ -255,7 +239,7 @@ class StringifyTest {
                                               final Predicate<Object> predicate) {
     return predicate.test(
       inspectionPoint
-        .getValueSupplier()
+        .getValue()
         .get()
     );
   }

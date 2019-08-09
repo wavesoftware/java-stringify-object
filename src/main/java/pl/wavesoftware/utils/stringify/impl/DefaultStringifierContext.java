@@ -16,8 +16,10 @@
 
 package pl.wavesoftware.utils.stringify.impl;
 
-import pl.wavesoftware.utils.stringify.impl.inspector.InspectionContext;
+import pl.wavesoftware.utils.stringify.api.InspectionContext;
+import pl.wavesoftware.utils.stringify.api.InspectionPoint;
 import pl.wavesoftware.utils.stringify.impl.inspector.RootInpector;
+import pl.wavesoftware.utils.stringify.impl.inspector.StringifierContext;
 import pl.wavesoftware.utils.stringify.spi.theme.Theme;
 
 import java.util.IdentityHashMap;
@@ -28,16 +30,18 @@ import java.util.function.Supplier;
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
  * @since 1.0.0
  */
-final class DefaultInspectionContext implements InspectionContext {
+final class DefaultStringifierContext implements StringifierContext {
   private static final Object CONTAIN = new Object();
 
   private final Map<Object, Object> resolved = new IdentityHashMap<>();
   private final Supplier<Theme> theme;
+  private final InspectionContext inspectionContext;
 
   private RootInpector rootInpector;
 
-  DefaultInspectionContext(Supplier<Theme> theme) {
+  DefaultStringifierContext(Supplier<Theme> theme, InspectionPoint inspectionPoint) {
     this.theme = theme;
+    this.inspectionContext = inspectionPoint.getContext();
   }
 
   @Override
@@ -60,7 +64,12 @@ final class DefaultInspectionContext implements InspectionContext {
     return theme.get();
   }
 
-  public void rootInpector(RootInpector rootInpector) {
+  @Override
+  public InspectionContext inspectionContext() {
+    return inspectionContext;
+  }
+
+  void rootInpector(RootInpector rootInpector) {
     this.rootInpector = rootInpector;
   }
 }

@@ -18,9 +18,9 @@ package pl.wavesoftware.utils.stringify.impl;
 
 import lombok.RequiredArgsConstructor;
 import pl.wavesoftware.utils.stringify.spi.BeanFactory;
-import pl.wavesoftware.utils.stringify.api.InspectionPoint;
 import pl.wavesoftware.utils.stringify.api.Mode;
 
+import java.lang.reflect.Field;
 import java.util.function.Supplier;
 
 /**
@@ -31,10 +31,9 @@ import java.util.function.Supplier;
 final class InspectingFieldFactory {
   private final Supplier<Mode> mode;
 
-  InspectingField create(InspectionPoint inspectionPoint,
-                         BeanFactory beanFactory) {
+  InspectingField create(Field field, Object containingObject, BeanFactory beanFactory) {
     return new InspectingFieldImpl(
-      inspectionPoint, createPredicate(beanFactory), beanFactory
+      field, containingObject, createPredicate(beanFactory), beanFactory
     );
   }
 

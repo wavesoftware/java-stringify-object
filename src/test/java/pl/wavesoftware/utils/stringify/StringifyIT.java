@@ -16,6 +16,7 @@
 
 package pl.wavesoftware.utils.stringify;
 
+import org.junit.jupiter.api.Tag;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.openjdk.jmh.annotations.Benchmark;
@@ -41,6 +42,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
  * @since 20.04.18
  */
+@Tag("perf")
 public class StringifyIT {
   private static final int PERCENT = 100;
   private static final int OPERATIONS = 1000;
@@ -51,7 +53,7 @@ public class StringifyIT {
   static final JmhCleaner cleaner = new JmhCleaner(StringifyIT.class);
 
   @Test
-  void doBenckmarking() throws RunnerException {
+  void performBenckmark() throws RunnerException {
     Options opt = new OptionsBuilder()
       .include(this.getClass().getName() + ".*")
       .mode(Mode.Throughput)

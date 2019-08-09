@@ -16,6 +16,8 @@
 
 package pl.wavesoftware.utils.stringify.impl.inspector;
 
+import pl.wavesoftware.utils.stringify.api.InspectionPoint;
+
 /**
  * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
  * @since 1.0.0
@@ -23,14 +25,18 @@ package pl.wavesoftware.utils.stringify.impl.inspector;
 final class CharacterInspector implements ObjectInspector {
 
   @Override
-  public boolean consentTo(Object candidate, InspectionContext context) {
-    return candidate instanceof Character;
+  public boolean consentTo(InspectionPoint point, StringifierContext context) {
+    Class<?> type = point.getType().get();
+    return Character.class.isAssignableFrom(type) || char.class.isAssignableFrom(type);
   }
 
   @Override
-  public CharSequence inspect(Object object, InspectionContext context) {
-    CharSequence quote = context.theme().character().quote();
-    StringBuilder stringBuilder = new StringBuilder(quote);
-    return stringBuilder.append(object.toString()).append(quote);
+  public CharSequence inspect(InspectionPoint point, StringifierContext context) {
+    StringBuilder stringBuilder = new StringBuilder(quote(point, context));
+    return stringBuilder.append(point.getValue().get().toString()).append(quote(point, context));
+  }
+
+  private CharSequence quote(InspectionPoint point, StringifierContext context) {
+    return context.theme().character().quote(point);
   }
 }

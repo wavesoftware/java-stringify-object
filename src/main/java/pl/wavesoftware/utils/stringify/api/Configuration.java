@@ -20,6 +20,8 @@ import pl.wavesoftware.utils.stringify.spi.BeanFactory;
 import pl.wavesoftware.utils.stringify.spi.Configurator;
 import pl.wavesoftware.utils.stringify.spi.theme.Theme;
 
+import java.util.function.Consumer;
+
 /**
  * A interface that represents a configuration options for this library
  * <p>
@@ -39,10 +41,10 @@ import pl.wavesoftware.utils.stringify.spi.theme.Theme;
  * {@link BeanFactory} interface can be used to create instances of classes, declared
  * in annotations used to define inspection rules.
  *
+ * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
  * @see Configurator
  * @see BeanFactory
  * @see pl.wavesoftware.utils.stringify.Stringify Stringify
- * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
  * @since 2.0.0
  */
 public interface Configuration {
@@ -69,4 +71,13 @@ public interface Configuration {
    * @return a self reference
    */
   Configuration theme(Theme theme);
+
+  /**
+   * A named general purpose configuration
+   *
+   * @param namespace     a namespace oa a store to configure
+   * @param storeConsumer a consumer that can modify a named store
+   * @return a self reference
+   */
+  Configuration store(Namespace namespace, Consumer<Store> storeConsumer);
 }

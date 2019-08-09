@@ -14,32 +14,31 @@
  * limitations under the License.
  */
 
-package pl.wavesoftware.utils.stringify.impl.beans;
+package pl.wavesoftware.utils.stringify.impl.inspector;
 
-import pl.wavesoftware.utils.stringify.api.InspectionPoint;
-import pl.wavesoftware.utils.stringify.spi.BeanFactory;
+import pl.wavesoftware.utils.stringify.api.IndentationControl;
 
-import java.util.function.Supplier;
+import static pl.wavesoftware.eid.utils.EidPreconditions.checkState;
 
 /**
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
  * @since 2.0.0
  */
-public enum BeansModule {
-  INSTANCE;
-
-  public BeanFactory defaultBeanFactory() {
-    return new DefaultBeanFactory();
+final class IndentationControlImpl implements IndentationControl {
+  private int indent = 0;
+  @Override
+  public int current() {
+    return indent;
   }
 
-  public BeanFactoryCache cachedBeanFactory(
-    Supplier<BeanFactory> beanFactory,
-    InspectionPoint inspectionPoint
-  ) {
-    return new DefaultBeanFactoryCache(() ->
-      new FallbackBootFactory(
-        new BootAwareBootFactory(beanFactory, inspectionPoint)
-      )
-    );
+  @Override
+  public void increment() {
+    indent++;
+  }
+
+  @Override
+  public void decrement() {
+    checkState(indent > 0, "20190805:230357");
+    indent--;
   }
 }

@@ -17,11 +17,18 @@
 package pl.wavesoftware.utils.stringify.impl;
 
 import pl.wavesoftware.utils.stringify.Stringify;
-import pl.wavesoftware.utils.stringify.api.Configuration;
 import pl.wavesoftware.utils.stringify.api.Inspect;
+import pl.wavesoftware.utils.stringify.api.InspectionContext;
+import pl.wavesoftware.utils.stringify.api.InspectionPoint;
 import pl.wavesoftware.utils.stringify.api.Mode;
+import pl.wavesoftware.utils.stringify.api.Namespace;
+import pl.wavesoftware.utils.stringify.api.Store;
+import pl.wavesoftware.utils.stringify.impl.inspector.InspectorModule;
 import pl.wavesoftware.utils.stringify.spi.BeanFactory;
 import pl.wavesoftware.utils.stringify.spi.theme.Theme;
+
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
 /**
  * A default implementation of {@link Stringify}.
@@ -33,6 +40,7 @@ public final class DefaultStringify implements Stringify {
 
   private static final DefaultConfiguration CONFIGURATION =
     DefaultConfigurationLoader.load();
+  private static final InspectorModule INSPECTOR = InspectorModule.INSTANCE;
 
   private final ToStringResolverImpl resolver;
 
@@ -42,7 +50,13 @@ public final class DefaultStringify implements Stringify {
    * @param target a target object to inspect
    */
   public DefaultStringify(Object target) {
-    resolver = new ToStringResolverImpl(target, CONFIGURATION.dup());
+    DefaultConfiguration configuration = CONFIGURATION.dup();
+    Supplier<InspectionContext> contextSupplier =
+      () -> INSPECTOR.inspectionContext(configuration::storeResolver);
+    InspectionPoint inspectionPoint = INSPECTOR.objectInspectionPoint(
+      target, contextSupplier
+    );
+    resolver = new ToStringResolverImpl(inspectionPoint, configuration);
   }
 
   /**
@@ -88,8 +102,14 @@ public final class DefaultStringify implements Stringify {
   }
 
   @Override
-  public Configuration theme(Theme theme) {
+  public Stringify theme(Theme theme) {
     resolver.theme(theme);
+    return this;
+  }
+
+  @Override
+  public Stringify store(Namespace namespace, Consumer<Store> storeConsumer) {
+    resolver.store(namespace, storeConsumer);
     return this;
   }
 }

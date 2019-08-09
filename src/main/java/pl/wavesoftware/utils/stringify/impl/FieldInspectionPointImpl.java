@@ -17,9 +17,9 @@
 package pl.wavesoftware.utils.stringify.impl;
 
 import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import pl.wavesoftware.eid.utils.UnsafeSupplier;
-import pl.wavesoftware.utils.stringify.api.InspectionPoint;
+import pl.wavesoftware.utils.stringify.api.InspectionContext;
+import pl.wavesoftware.utils.stringify.impl.lang.LangModule;
 
 import javax.annotation.Nonnull;
 import java.lang.reflect.Field;
@@ -31,30 +31,53 @@ import static pl.wavesoftware.eid.utils.EidExecutions.tryToExecute;
  * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
  * @since 30.04.18
  */
-@Getter
-@RequiredArgsConstructor
-final class InspectionPointImpl implements InspectionPoint {
-  private final Field field;
-  private final Object containingObject;
+final class FieldInspectionPointImpl implements FieldInspectionPoint {
+  private final InspectingField field;
+  private final InspectionContext context;
+  private final Supplier<Object> value = LangModule.INSTANCE.lazy(this::value);
+  private final Supplier<Class<?>> type;
 
-  @Override
-  public Supplier<Object> getValueSupplier() {
-    return () -> {
-      try (final FieldAccessiblier accessiblier = new FieldAccessiblier(getField())) {
-        return tryToExecute(new UnsafeSupplier<Object>() {
-          @Override
-          @Nonnull
-          public Object get() throws IllegalAccessException {
-            return accessiblier
-              .getField()
-              .get(getContainingObject());
-          }
-        }, "20180430:113514");
-      }
-    };
+  FieldInspectionPointImpl(InspectingField field, InspectionContext context) {
+    this.field = field;
+    type = LangModule.INSTANCE.lazy(() -> field.getFieldReflection().getType());
+    this.context = context;
   }
 
+  @Override
+  public InspectingField getField() {
+    return field;
+  }
+
+  @Override
+  public Supplier<Object> getValue() {
+    return value;
+  }
+
+  @Override
+  public Supplier<Class<?>> getType() {
+    return type;
+  }
+
+  @Override
+  public InspectionContext getContext() {
+    return context;
+  }
+
+  private Object value() {
+    try (final FieldAccessiblier accessiblier = new FieldAccessiblier(field.getFieldReflection())) {
+      return tryToExecute(new UnsafeSupplier<Object>() {
+        @Override
+        @Nonnull
+        public Object get() throws IllegalAccessException {
+          return accessiblier
+            .getField()
+            .get(field.getContainingObject());
+        }
+      }, "20180430:113514");
+    }
+  }
   private static final class FieldAccessiblier implements AutoCloseable {
+
     @Getter
     private final Field field;
     private final boolean accessible;

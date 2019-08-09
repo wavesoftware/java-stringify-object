@@ -7,7 +7,7 @@ import java.util.function.Predicate;
 final class UnlessContainsSecret implements Predicate<InspectionPoint> {
   @Override
   public boolean test(InspectionPoint inspectionPoint) {
-    Object value = inspectionPoint.getValueSupplier().get();
+    Object value = inspectionPoint.getValue().get();
     return !value.toString().contains("secret");
   }
 }

@@ -16,9 +16,11 @@
 
 package pl.wavesoftware.utils.stringify.impl.inspector;
 
+import pl.wavesoftware.utils.stringify.api.InspectionPoint;
+
 /**
  * Represents a basic object inspector that can handle specific type of object, which
- * is determined by call to {@link #consentTo(Object, InspectionContext)}
+ * is determined by call to {@link #consentTo(InspectionPoint, StringifierContext)}
  * method.
  *
  * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
@@ -28,18 +30,18 @@ public interface ObjectInspector {
   /**
    * Determines if this inspector is suitable for a given object
    *
-   * @param candidate a candidate to inspect
-   * @param context   a context of inspection
+   * @param point   a point that is being inspected
+   * @param context a context of inspection
    * @return true, if this object inspector can inspect candidate object
    */
-  boolean consentTo(Object candidate, InspectionContext context);
+  boolean consentTo(InspectionPoint point, StringifierContext context);
 
   /**
    * Will inspect a given object to character sequence
    *
-   * @param object  a object to inspect
+   * @param point   a point that is being inspected
    * @param context a context of inspection
    * @return a character sequence representation of given object
    */
-  CharSequence inspect(Object object, InspectionContext context);
+  CharSequence inspect(InspectionPoint point, StringifierContext context);
 }

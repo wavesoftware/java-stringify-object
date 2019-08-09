@@ -17,12 +17,17 @@
 package pl.wavesoftware.utils.stringify.impl;
 
 import pl.wavesoftware.utils.stringify.api.Configuration;
+import pl.wavesoftware.utils.stringify.api.InspectionPoint;
 import pl.wavesoftware.utils.stringify.api.Mode;
+import pl.wavesoftware.utils.stringify.api.Namespace;
+import pl.wavesoftware.utils.stringify.api.Store;
 import pl.wavesoftware.utils.stringify.impl.beans.BeanFactoryCache;
 import pl.wavesoftware.utils.stringify.impl.beans.BeansModule;
-import pl.wavesoftware.utils.stringify.impl.inspector.InspectionContext;
+import pl.wavesoftware.utils.stringify.impl.inspector.StringifierContext;
 import pl.wavesoftware.utils.stringify.spi.BeanFactory;
 import pl.wavesoftware.utils.stringify.spi.theme.Theme;
+
+import java.util.function.Consumer;
 
 /**
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
@@ -36,44 +41,44 @@ final class ToStringResolverImpl implements ToStringResolver, Configuration {
   /**
    * A default constructor
    *
-   * @param target        a target object to resolve
-   * @param configuration a configuration
+   * @param inspectionPoint a inspection point to resolve
+   * @param configuration   a configuration
    */
-  ToStringResolverImpl(Object target, DefaultConfiguration configuration) {
+  ToStringResolverImpl(InspectionPoint inspectionPoint, DefaultConfiguration configuration) {
     this(
-      target,
+      inspectionPoint,
       configuration,
-      new DefaultInspectionContext(configuration::getTheme),
+      new DefaultStringifierContext(configuration::getTheme, inspectionPoint),
       BeansModule.INSTANCE.cachedBeanFactory(
-        configuration::getBeanFactory, target
+        configuration::getBeanFactory, inspectionPoint
       ),
       new InspectingFieldFactory(configuration::getMode)
     );
   }
 
   ToStringResolverImpl(
-    Object target,
+    InspectionPoint inspectionPoint,
     DefaultConfiguration configuration,
-    InspectionContext inspectionContext,
+    StringifierContext stringifierContext,
     BeanFactoryCache beanFactoryCache,
     InspectingFieldFactory inspectingFieldFactory
   ) {
     this.configuration = configuration;
     this.delegateResolver = new InspectorBasedToStringResolver(
-      configuration, target, inspectionContext,
+      configuration, inspectionPoint, stringifierContext,
       beanFactoryCache, inspectingFieldFactory
     );
   }
 
   private ToStringResolverImpl(
-    Object target,
+    InspectionPoint inspectionPoint,
     DefaultConfiguration configuration,
-    DefaultInspectionContext inspectionContext,
+    DefaultStringifierContext inspectionContext,
     BeanFactoryCache beanFactoryCache,
     InspectingFieldFactory inspectingFieldFactory
   ) {
     this(
-      target, configuration, (InspectionContext) inspectionContext,
+      inspectionPoint, configuration, (StringifierContext) inspectionContext,
       beanFactoryCache, inspectingFieldFactory
     );
     inspectionContext.rootInpector(delegateResolver::inspectObject);
@@ -100,5 +105,11 @@ final class ToStringResolverImpl implements ToStringResolver, Configuration {
   public Configuration theme(Theme theme) {
     delegateResolver.clear();
     return configuration.theme(theme);
+  }
+
+  @Override
+  public Configuration store(Namespace namespace, Consumer<Store> storeConsumer) {
+    delegateResolver.clear();
+    return configuration.store(namespace, storeConsumer);
   }
 }

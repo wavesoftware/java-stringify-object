@@ -14,32 +14,46 @@
  * limitations under the License.
  */
 
-package pl.wavesoftware.utils.stringify.impl.beans;
+package pl.wavesoftware.utils.stringify.api;
 
-import pl.wavesoftware.utils.stringify.api.InspectionPoint;
-import pl.wavesoftware.utils.stringify.spi.BeanFactory;
+import org.junit.jupiter.api.Test;
 
-import java.util.function.Supplier;
+import static org.assertj.core.api.Assertions.*;
 
 /**
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
  * @since 2.0.0
  */
-public enum BeansModule {
-  INSTANCE;
+class NamespaceTest {
 
-  public BeanFactory defaultBeanFactory() {
-    return new DefaultBeanFactory();
+  @Test
+  void equalsToItself() {
+    // given
+    Namespace ns = Namespace.GLOBAL;
+
+    // then
+    assertThat(ns).isEqualTo(Namespace.GLOBAL);
   }
 
-  public BeanFactoryCache cachedBeanFactory(
-    Supplier<BeanFactory> beanFactory,
-    InspectionPoint inspectionPoint
-  ) {
-    return new DefaultBeanFactoryCache(() ->
-      new FallbackBootFactory(
-        new BootAwareBootFactory(beanFactory, inspectionPoint)
-      )
-    );
+  @Test
+  void doNotEqualNull() {
+    // then
+    assertThat(Namespace.GLOBAL).isNotEqualTo(null);
+  }
+
+  @Test
+  void doNotEqualOtherType() {
+    // then
+    assertThat(Namespace.GLOBAL).isNotEqualTo("test");
+  }
+
+  @Test
+  void equalsByParts() {
+    // when
+    Namespace ns1 = Namespace.create("alice", true, "bob");
+    Namespace ns2 = Namespace.create("alice", true, "bob");
+
+    // then
+    assertThat(ns1).isEqualTo(ns2);
   }
 }

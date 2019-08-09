@@ -16,7 +16,14 @@
 
 package pl.wavesoftware.utils.stringify.impl.inspector;
 
+import pl.wavesoftware.utils.stringify.api.InspectionContext;
+import pl.wavesoftware.utils.stringify.api.InspectionPoint;
+import pl.wavesoftware.utils.stringify.api.Namespace;
+import pl.wavesoftware.utils.stringify.api.Store;
+
 import java.util.Arrays;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 /**
  * @author <a href="mailto:krzysztof.suszynski@wavesoftware.pl">Krzysztof Suszynski</a>
@@ -35,5 +42,15 @@ public enum InspectorModule {
       new IterableInspector(),
       new RecursionInspector()
     );
+  }
+
+  public InspectionPoint objectInspectionPoint(
+    Object target, Supplier<InspectionContext> contextSupplier
+  ) {
+    return new ObjectInspectionPoint(target, contextSupplier);
+  }
+
+  public InspectionContext inspectionContext(Function<Namespace, Store> storeResolver) {
+    return new InspectionContextImpl(storeResolver);
   }
 }

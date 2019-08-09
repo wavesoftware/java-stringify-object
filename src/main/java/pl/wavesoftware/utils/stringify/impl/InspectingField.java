@@ -18,6 +18,7 @@ package pl.wavesoftware.utils.stringify.impl;
 
 import pl.wavesoftware.utils.stringify.spi.Masker;
 
+import java.lang.reflect.Field;
 import java.util.Optional;
 
 /**
@@ -26,11 +27,32 @@ import java.util.Optional;
  */
 interface InspectingField {
   /**
+   * Gets a name of a field
+   *
+   * @return a name
+   */
+  String getName();
+
+  /**
+   * Get field representation of inspecting field
+   * @return a field
+   */
+  Field getFieldReflection();
+
+  /**
+   * Get object that contains this inspecting field
+   *
+   * @return an object
+   */
+  Object getContainingObject();
+
+  /**
    * True if should inspect given field
    *
+   * @param inspectionPoint a inspection point to test
    * @return true, if should inspect
    */
-  boolean shouldInspect();
+  boolean shouldInspect(FieldInspectionPoint inspectionPoint);
 
   /**
    * Show null if true
@@ -47,4 +69,5 @@ interface InspectingField {
    * @return a masker
    */
   <T> Optional<Masker<T>> masker();
+
 }

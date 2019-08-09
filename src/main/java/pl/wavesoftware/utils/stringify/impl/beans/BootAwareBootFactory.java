@@ -18,6 +18,7 @@ package pl.wavesoftware.utils.stringify.impl.beans;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import pl.wavesoftware.utils.stringify.api.InspectionPoint;
 import pl.wavesoftware.utils.stringify.impl.lang.Inspectable;
 import pl.wavesoftware.utils.stringify.impl.lang.LangModule;
 import pl.wavesoftware.utils.stringify.spi.BeanFactory;
@@ -33,11 +34,14 @@ final class BootAwareBootFactory implements BeanFactory, Inspectable {
   private static final Logger LOGGER =
     LoggerFactory.getLogger(BootAwareBootFactory.class);
   private final Supplier<BeanFactory> delegateSupplier;
-  private final Object target;
+  private final InspectionPoint inspectionPoint;
 
-  BootAwareBootFactory(Supplier<BeanFactory> delegateSupplier, Object target) {
+  BootAwareBootFactory(
+    Supplier<BeanFactory> delegateSupplier,
+    InspectionPoint inspectionPoint
+  ) {
     this.delegateSupplier = delegateSupplier;
-    this.target = target;
+    this.inspectionPoint = inspectionPoint;
   }
 
   @Override
@@ -55,7 +59,9 @@ final class BootAwareBootFactory implements BeanFactory, Inspectable {
             " has been already invoked for {} while trying to resolve {}. This is " +
             "usually some race condition issues. Using default BeanFactory as a " +
             "fallback for this call.",
-          safeInspect(delegate), safeInspect(target), contractClass
+          safeInspect(delegate),
+          safeInspect(inspectionPoint.getValue().get()),
+          contractClass
         );
         return BeansModule.INSTANCE.defaultBeanFactory();
       }
