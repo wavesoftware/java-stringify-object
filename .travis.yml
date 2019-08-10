@@ -1,13 +1,19 @@
 language: java
-script: ./mvnw install --fail-at-end
+sudo: false
+dist: xenial
+script: ./mvnw -V clean verify --fail-at-end -U -Prelease-checks
 matrix:
   include:
-  - jdk: openjdk7
-  - jdk: openjdk8
-    env: JACOCO=true COVERALLS=true
-  - jdk: oraclejdk8
-  - jdk: oraclejdk9
-  - jdk: openjdk8
-    env: GDMSESSION=sonar
-  - jdk: openjdk8
-    env: SONAR=publish
+    - jdk: openjdk11
+      env: JACOCO=true
+    - jdk: openjdk8
+      env: JACOCO=true SONAR=publish
+notifications:
+  email:
+    on_failure: change
+
+addons:
+  sonarcloud:
+    organization: "wavesoftware"
+    token:
+      secure: "CjBAH5+iEJK7jc9ceIKUSQkUdfxc2wD07Ql5i89BVEJ0/7eGbrepQIDm6PoaLsYFtdkpQfL/dtAttG3GKBa4IN/XoH0FcYKfLe4CmDwYQOSYHH8hLnSA48k6PUqxmA0X/IRuZ5o90VYjqWjvJTx3rF4j6mqoE3Uj/WUZK9FR+MYGkXLcFM5D11mjjyaN1ZAb2v6dZC53DkEx85GZU5UMusPIOdTxkjggjujHoz8mm9Zh0MgzkBmhVUQg6Irl7H+1fzgzqyuD9p2lRh8K0mgN1o3BvpdQ7qyki/gfOHJeC8hYlXfqyHIzofewWG/1jn0c/8Lel1DevVl3HM3P3etMu89QjKFMvTYnoDfyPDjUBDwYS2YrtPGA9l32NnsT6hpmySUQgMNnCZ6RVTDfsdB+a/6CvFAfC4ijG8pRTFM/zqLob2mP0tGs22xDnXKiM+g01+yzfrtSfkgNQeur9cLgxDi0kon9pdlnJ7jT7Ieu6Z3Vzxm+pcxwVBGbEXUUjDs0hMcr9smP0q258jis9szfsG+oKpWP/d1tJvYINhUsd21XFefUAEt+Aj1AAEJCCezSHH5LaTC3ivosCAZIVg9+4TibqTjzqG6yUjE6vFYJqVRfwQ78yGh/e3/wtWaG5jiRl520PunDh3IKSgP19QeNp1joTR8QJCaRBN5n4VxNVtc="

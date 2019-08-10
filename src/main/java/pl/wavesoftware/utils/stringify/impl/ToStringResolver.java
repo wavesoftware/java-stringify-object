@@ -1,29 +1,28 @@
+/*
+ * Copyright 2018-2019 Wave Software
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package pl.wavesoftware.utils.stringify.impl;
 
-import pl.wavesoftware.utils.stringify.configuration.Mode;
-import pl.wavesoftware.utils.stringify.configuration.BeanFactory;
-
 /**
+ * Resolves an representation of object to a char sequence.
+ *
  * @author <a href="mailto:krzysztof.suszynski@coi.gov.pl">Krzysztof Suszynski</a>
- * @since 27.04.18
+ * @since 1.0.0
  */
-public interface ToStringResolver {
-  /**
-   * Configures a mode in which resolver operates
-   *
-   * @param mode a mode to set
-   * @return a self reference
-   */
-  ToStringResolver withMode(Mode mode);
-
-  /**
-   * Configures a predicate factory to be used to load implementation of predicates used
-   *
-   * @param beanFactory a predicate factory
-   * @return a self reference
-   */
-  ToStringResolver withBeanFactory(BeanFactory beanFactory);
-
+interface ToStringResolver {
   /**
    * Resolves a {@link String} representation of given object.
    *

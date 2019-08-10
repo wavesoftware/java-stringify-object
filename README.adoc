@@ -1,0 +1,289 @@
+= Stringify Object for Java
+
+https://travis-ci.org/wavesoftware/java-stringify-object[image:https://travis-ci.org/wavesoftware/java-stringify-object.svg?branch=master[Build
+Status]]
+https://sonarcloud.io/dashboard?id=wavesoftware_java-stringify-object[image:https://sonarcloud.io/api/project_badges/measure?project=wavesoftware_java-stringify-object&metric=alert_status[Quality Gate]]
+https://sonarcloud.io/dashboard?id=wavesoftware_java-stringify-object[image:https://sonarcloud.io/api/project_badges/measure?project=wavesoftware_java-stringify-object&metric=coverage[Coverage]]
+https://bintray.com/bintray/jcenter/pl.wavesoftware.utils%3Astringify-object[image:https://img.shields.io/maven-central/v/pl.wavesoftware.utils/stringify-object.svg[Maven
+Central]]
+
+A utility to safely inspect any Java Object as String representation.
+It's best to be used with domain model (also with JPA entities) with
+intention to dump those entities as text to log files.
+
+It runs in two modes: `+PROMISCUOUS+` (by default) and `+QUIET+`. In
+`+PROMISCUOUS+` mode every defined field is automatically inspected,
+unless the field is annotated with `+@DoNotInspect+` annotation. In
+`+QUIET+` mode only fields annotated with `+@Inspect+` will gets
+inspected.
+
+There is also support for masking out sensitive data that may occur in objects. To do that, annotate field with `+@Mask+` annotation specifying a `+Masker+` implementation you prepared.
+
+This library has proper support for object graph cycles, and JPA
+(Hibernate) lazy loaded elements. There is support for output themes.
+
+== Usage
+
+=== In Promiscuous mode
+
+[source,java]
+----
+// In PROMISCUOUS mode define fields to exclude
+class Person {
+  private int id;
+  @DisplayNull // <1>
+  private Person parent;
+  private List<Person> childs;
+  private Account account;
+  @Inspect(conditionally = IsInDevelopment.class) // <2>
+  private String password;
+  @DoNotInspect
+  private String ignored;
+  @Mask(SocialIdNumberMasker.class) // <3>
+  private String socialNumber;
+}
+  
+// inspect an object  
+Person person = query.getSingleResult();
+Stringify stringify = Stringify.of(person);
+stringify.mode(Mode.PROMISCUOUS);
+// stringify.beanFactory(...);
+assert "<Person id=15, parent=<Person id=16, parent=null, "
+ + "childs=[(↻)], account=⁂Lazy, socialNumber=\"455*********\">, childs=[], "
+ + "account=⁂Lazy, socialNumber=\"156*********\">".equals(stringify.toString());
+----
+
+<1> Configures a field inspection to show null values
+<2> Inspects a field, but only if given predicate returns `true`
+<3> Mask outs a value with user provided `+Masker+` implementation.
+
+=== In Quiet mode
+
+[source,java]
+----
+import pl.wavesoftware.utils.stringify.api.Inspect;// In QUIET mode define fields to inspect
+class Person {  
+  @Inspect private int id;
+  @Inspect @DisplayNull private Person parent;
+  @Inspect private List<Person> childs;
+  @Inspect private Account account;
+  private String ignored;
+  @Inspect @Mask(SocialIdNumberMasker.class)
+  private String socialNumber;
+}
+  
+// inspect an object  
+Person person = query.getSingleResult();
+Stringify stringify = Stringify.of(person);
+stringify.mode(Mode.QUIET);
+assert "<Person id=15, parent=<Person id=16, parent=null, "
+ + "childs=[(↻)], account=⁂Lazy, socialNumber=\"455*********\">, childs=[], "
+ + "account=⁂Lazy, socialNumber=\"156*********\">".equals(stringify.toString());
+----
+
+== Features
+
+* String representation of any Java class in two modes `+PROMISCUOUS+`
+and `+QUIET+`.
+* Fine tuning of which fields to display
+* Supports a masking of sensitive data, with `+@Mask+` annotation.
+* Support for cycles in object graph - `+(↻)+` is displayed instead, by default.
+* Support for Hibernate lazy loaded entities - `+⁂Lazy+` is displayed
+instead, by default.
+* Full support for themes with indentation control. See a https://github.com/wavesoftware/java-stringify-object/blob/develop/src/test/java/pl/wavesoftware/utils/stringify/spi/theme/PrettyPrintTheme.java[PrettyPrintTheme] in test code, as an example.
+
+[[vs-lombok-tostring]]
+== vs. Lombok @ToString
+
+Stringify Object for Java is designed for *slightly different* use case
+then Lombok.
+
+Lombok `+@ToString+` is designed to quickly inspect fields of simple
+objects by generating static simple implementation of this mechanism.
+
+Stringify Object for Java is designed to inspect complex objects that
+can have cycles and can be managed by JPA provider like Hibernate
+(introducing Lazy Loading problems).
+
+=== Pros of Lombok vs Stringify Object
+
+* Lombok is *fast* - it's statically generated code without using
+Reflection API.
+* Lombok is *easy* - it's zero configuration in most cases.
+
+=== Cons of Lombok vs Stringify Object
+
+* Lombok can't *detect cycles* is object graph, which implies
+`+StackOverflowException+` being thrown in that case
+* Lombok can't detect a *lazy loaded entities*, which leads to force
+loading it from JPA by invoking SQL statements. It's typical *n+1
+problem*, but with nasty consequences - your `+toString()+` method is
+invoking SQL without your knowledge!!
+
+== Configuration
+
+Configuration is done in two ways: declarative - using Java's service
+loader mechanism, and programmatic.
+
+=== Configuration using Service Loader
+
+A `+Configurator+` interface is intended to be implemented in user code,
+and assigned to https://www.baeldung.com/java-spi[Service Loader]
+mechanism.
+
+To do that, create on your classpath, a file:
+
+`+/META-INF/services/pl.wavesoftware.utils.stringify.spi.Configurator+`
+
+In that file, place a fully qualified class name of your class that
+implements `+Configurator+` interface. It should be called first time
+you use an Stringify to inspect an object:
+
+....
+# classpath:/META-INF/services/pl.wavesoftware.utils.stringify.spi.Configurator
+org.acmecorp.StringifyConfigurator
+....
+
+Then implement that class in your code:
+
+[source,java]
+----
+package org.acmecorp;
+
+import pl.wavesoftware.utils.stringify.api.Configuration;
+import pl.wavesoftware.utils.stringify.spi.Configurator;
+
+public final class StringifyConfigurator implements Configurator {
+  
+  @Override
+  public void configure(Configuration configuration) {
+    configuration.beanFactory(new SpringBeanFactory());
+  }
+}
+----
+
+with example Spring based BeanFactory:
+
+[source,java]
+----
+package org.acmecorp;
+
+import org.springframework.context.event.ContextRefreshedEvent;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.annotation.Configuration;
+
+import pl.wavesoftware.utils.stringify.spi.BeanFactory;
+import pl.wavesoftware.utils.stringify.spi.BootingAware;
+
+@Configuration
+class SpringBeanFactory implements BeanFactory, BootingAware {
+  private static ApplicationContext context;
+  
+  @EventListener(ContextRefreshedEvent.class)
+  void onRefresh(ContextRefreshedEvent event) {
+    SpringBeanFactory.context = event.getApplicationContext();
+  }
+  
+  @Override
+  public <T> T create(Class<T> contractClass) {
+    return SpringBeanFactory.context.getBean(contractClass);
+  }
+
+  @Override
+  public boolean isReady() {
+    return SpringBeanFactory.context != null;
+  }
+}
+----
+
+=== Programmatic configuration
+
+You can also fine tune you configuration on instance level - using
+methods available at `+Stringify+` interface:
+
+[source,java]
+----
+// given
+BeanFactory beanFactory = createBeanFactory();
+Person person = createPerson();
+
+// then
+Stringify stringifier = Stringify.of(person);
+stringifier
+  .beanFactory(beanFactory)
+  .mode(Mode.QUIET)
+  .stringify();
+----
+
+== Themes
+
+Be default a theme is set which is safe to use in JPA environment and it should be safe to use in logging, as output that it produces is rendered in single line.
+
+If you prefer some tweaks to the theme, you can easily do that by implementing some methods from `+Theme+` interface:
+
+[source,java]
+----
+final class RecursionIdTheme implements Theme {
+  private static CharSequence name(Object target) {
+    return target.getClass().getSimpleName()
+      + "@"
+      + Integer.toUnsignedString(System.identityHashCode(target), 36);
+  }
+
+  @Override
+  public ComplexObjectStyle complexObject() {
+    return new ComplexObjectStyle() {
+
+      @Override
+      public CharSequence name(InspectionPoint point) {
+        return RecursionIdTheme.name(point.getValue().get());
+      }
+    };
+  }
+
+  @Override
+  public RecursionStyle recursion() {
+    return new RecursionStyle() {
+      @Override
+      public CharSequence representation(InspectionPoint point) {
+        return "(↻️️ " + RecursionIdTheme.name(point.getValue().get()) + ")";
+      }
+    };
+  }
+}
+----
+
+To set use `+Configurator+`, described above in detail, or set theme to instance of `+Stringify+` object:
+
+[source,java]
+----
+Stringify.of(target)
+  .theme(new RecursionIdTheme())
+  .stringify();
+----
+
+NOTE: Look up a class https://github.com/wavesoftware/java-stringify-object/blob/develop/src/test/java/pl/wavesoftware/utils/stringify/spi/theme/PrettyPrintTheme.java[PrettyPrintTheme] in test code for a more complete example of theme usage. That's with indentation control and options.
+
+== Dependencies
+
+* Java >= 8
+* https://github.com/wavesoftware/java-eid-exceptions[EID Exceptions]
+library
+
+=== Contributing
+
+Contributions are welcome!
+
+To contribute, follow the standard
+http://danielkummer.github.io/git-flow-cheatsheet/[git flow] of:
+
+. Fork it
+. Create your feature branch
+(`+git checkout -b feature/my-new-feature+`)
+. Commit your changes (`+git commit -am 'Add some feature'+`)
+. Push to the branch (`+git push origin feature/my-new-feature+`)
+. Create new Pull Request
+
+Even if you can't contribute code, if you have an idea for an
+improvement please open an
+https://github.com/wavesoftware/java-stringify-object/issues[issue].
