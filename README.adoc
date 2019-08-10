@@ -17,8 +17,10 @@ unless the field is annotated with `+@DoNotInspect+` annotation. In
 `+QUIET+` mode only fields annotated with `+@Inspect+` will gets
 inspected.
 
+There is also support for masking out sensitive data that may occur in objects. To do that, annotate field with `+@Mask+` annotation specifying a `+Masker+` implementation you prepared.
+
 This library has proper support for object graph cycles, and JPA
-(Hibernate) lazy loaded elements.
+(Hibernate) lazy loaded elements. There is support for output themes.
 
 == Usage
 
@@ -37,51 +39,58 @@ class Person {
   private String password;
   @DoNotInspect
   private String ignored;
+  @Mask(SocialIdNumberMasker.class) // <3>
+  private String socialNumber;
 }
   
 // inspect an object  
-List<Person> people = query.getResultList();  
-Stringify stringify = Stringify.of(people);
+Person person = query.getSingleResult();
+Stringify stringify = Stringify.of(person);
 stringify.mode(Mode.PROMISCUOUS);
 // stringify.beanFactory(...);
-assert "[<Person id=15, parent=<Person id=16, parent=null, "
- + "childs=[(↻)], account=⁂Lazy>, childs=[], "  
- + "account=⁂Lazy>]".equals(stringify.toString());
+assert "<Person id=15, parent=<Person id=16, parent=null, "
+ + "childs=[(↻)], account=⁂Lazy, socialNumber=\"455*********\">, childs=[], "
+ + "account=⁂Lazy, socialNumber=\"156*********\">".equals(stringify.toString());
 ----
 
 <1> Configures a field inspection to show null values
 <2> Inspects a field, but only if given predicate returns `true`
+<3> Mask outs a value with user provided `+Masker+` implementation.
 
 === In Quiet mode
 
 [source,java]
 ----
-// In QUIET mode define fields to inspect  
+import pl.wavesoftware.utils.stringify.api.Inspect;// In QUIET mode define fields to inspect
 class Person {  
   @Inspect private int id;
   @Inspect @DisplayNull private Person parent;
   @Inspect private List<Person> childs;
   @Inspect private Account account;
   private String ignored;
+  @Inspect @Mask(SocialIdNumberMasker.class)
+  private String socialNumber;
 }
   
 // inspect an object  
-List<Person> people = query.getResultList();  
-Stringify stringify = Stringify.of(people);
+Person person = query.getSingleResult();
+Stringify stringify = Stringify.of(person);
 stringify.mode(Mode.QUIET);
-assert "[<Person id=15, parent=<Person id=16, parent=null, "
- + "childs=[(↻)], account=⁂Lazy>, childs=[], "  
- + "account=⁂Lazy>]".equals(stringify.toString());
+assert "<Person id=15, parent=<Person id=16, parent=null, "
+ + "childs=[(↻)], account=⁂Lazy, socialNumber=\"455*********\">, childs=[], "
+ + "account=⁂Lazy, socialNumber=\"156*********\">".equals(stringify.toString());
 ----
 
 == Features
 
 * String representation of any Java class in two modes `+PROMISCUOUS+`
-and `+QUIET+`
+and `+QUIET+`.
 * Fine tuning of which fields to display
-* Support for cycles in object graph - `+(↻)+` is displayed instead
+* Supports a masking of sensitive data, with `+@Mask+` annotation.
+* Support for cycles in object graph - `+(↻)+` is displayed instead, by default.
 * Support for Hibernate lazy loaded entities - `+⁂Lazy+` is displayed
-instead
+instead, by default.
+* Full support for themes with indentation control. See a https://github.com/wavesoftware/java-stringify-object/blob/develop/src/test/java/pl/wavesoftware/utils/stringify/spi/theme/PrettyPrintTheme.java[PrettyPrintTheme] in test code, as an example.
 
 [[vs-lombok-tostring]]
 == vs. Lombok @ToString
@@ -205,6 +214,55 @@ stringifier
   .mode(Mode.QUIET)
   .stringify();
 ----
+
+== Themes
+
+Be default a theme is set which is safe to use in JPA environment and it should be safe to use in logging, as output that it produces is rendered in single line.
+
+If you prefer some tweaks to the theme, you can easily do that by implementing some methods from `+Theme+` interface:
+
+[source,java]
+----
+final class RecursionIdTheme implements Theme {
+  private static CharSequence name(Object target) {
+    return target.getClass().getSimpleName()
+      + "@"
+      + Integer.toUnsignedString(System.identityHashCode(target), 36);
+  }
+
+  @Override
+  public ComplexObjectStyle complexObject() {
+    return new ComplexObjectStyle() {
+
+      @Override
+      public CharSequence name(InspectionPoint point) {
+        return RecursionIdTheme.name(point.getValue().get());
+      }
+    };
+  }
+
+  @Override
+  public RecursionStyle recursion() {
+    return new RecursionStyle() {
+      @Override
+      public CharSequence representation(InspectionPoint point) {
+        return "(↻️️ " + RecursionIdTheme.name(point.getValue().get()) + ")";
+      }
+    };
+  }
+}
+----
+
+To set use `+Configurator+`, described above in detail, or set theme to instance of `+Stringify+` object:
+
+[source,java]
+----
+Stringify.of(target)
+  .theme(new RecursionIdTheme())
+  .stringify();
+----
+
+NOTE: Look up a class https://github.com/wavesoftware/java-stringify-object/blob/develop/src/test/java/pl/wavesoftware/utils/stringify/spi/theme/PrettyPrintTheme.java[PrettyPrintTheme] in test code for a more complete example of theme usage. That's with indentation control and options.
 
 == Dependencies
 

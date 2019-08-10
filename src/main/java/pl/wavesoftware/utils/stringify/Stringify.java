@@ -17,7 +17,9 @@
 package pl.wavesoftware.utils.stringify;
 
 import pl.wavesoftware.utils.stringify.api.Configuration;
+import pl.wavesoftware.utils.stringify.api.DoNotInspect;
 import pl.wavesoftware.utils.stringify.api.Inspect;
+import pl.wavesoftware.utils.stringify.api.Mask;
 import pl.wavesoftware.utils.stringify.api.Mode;
 import pl.wavesoftware.utils.stringify.api.Namespace;
 import pl.wavesoftware.utils.stringify.api.Store;
@@ -35,7 +37,7 @@ import java.util.function.Consumer;
  * <p>
  * It runs in two modes: {@code PROMISCUOUS} (by default) and {@code QUIET}. In
  * {@code PROMISCUOUS} mode every defined field is automatically inspected, unless the
- * field is annotated with {@code @DoNotInspect} annotation. In {@code QUIET} mode only
+ * field is annotated with {@link DoNotInspect} annotation. In {@code QUIET} mode only
  * fields annotated with @Inspect will gets inspected.
  * <p>
  * This library has proper support for object graph cycles, and JPA (Hibernate)
@@ -54,15 +56,17 @@ import java.util.function.Consumer;
  *   private String password;
  *   &#064;DoNotInspect
  *   private String ignored;
+ *   &#064;Mask(SocialIdNumberMasker.class)
+ *   private String socialNumber;
  * }
  *
  * // inspect an object
- * List&lt;Person&gt; people = query.getResultList();
+ * Person person = query.getSingleResult();
  * Stringify stringify = Stringify.of(people);
  * // stringify.beanFactory(...);
  * assert "&lt;Person id=15, parent=&lt;Person id=16, parent=null, "
- *  + "childs=[(↻)], account=⁂Lazy&gt;, childs=[], "
- *  + "account=⁂Lazy&gt;".equals(stringify.toString());
+ *  + "childs=[(↻)], account=⁂Lazy, socialNumber=\"455*********\"&gt;, childs=[], "
+ *  + "account=⁂Lazy, socialNumber=\"156*********\"&gt;".equals(stringify.toString());
  * </pre>
  *
  *
@@ -71,9 +75,13 @@ import java.util.function.Consumer;
  *     <li>String representation of any Java class in two modes {@code PROMISCUOUS}
  *     and {@code QUIET}</li>
  *     <li>Fine tuning of which fields to display</li>
- *     <li>Support for cycles in object graph - {@code (↻)} is displayed instead</li>
+ *     <li>Supports a masking of sensitive data, with {@link Mask} annotation.</li>
+ *     <li>Support for cycles in object graph - {@code (↻)} is displayed instead, by default.</li>
  *     <li>Support for Hibernate lazy loaded entities - {@code ⁂Lazy} is displayed
- *     instead</li>
+ *     instead, by default</li>
+ *     <li>Full support for themes with indentation control. See a
+ *     {@code pl.wavesoftware.utils.stringify.spi.theme.PrettyPrintTheme} in test code,
+ *     as an example</li>
  * </ul>
  *
  * <h2>vs. Lombok @ToString</h2>
